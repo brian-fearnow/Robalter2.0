@@ -242,8 +242,9 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .checkbox-btn { width: 32px; height: 32px; border-radius: 6px; border: 2px solid #cbd5e1; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #cbd5e1; }
 .checkbox-btn.checked { background: var(--mackenzie-green); border-color: var(--mackenzie-green); color: white; }
 
-.course-selector-row { display: flex; gap: 10px; align-items: center; }
-.course-selector-row select { flex: 1; padding: 0.6rem; border: 1.5px solid var(--border-light); border-radius: 6px; font-weight: bold; color: var(--mackenzie-green); }
+.course-selector-row { display: flex; gap: 6px; align-items: center; width: 100%; overflow: hidden; }
+.course-selector-row select { flex: 1; min-width: 0; padding: 0.5rem 0.35rem; border: 1.5px solid var(--border-light); border-radius: 6px; font-weight: bold; color: var(--mackenzie-green); overflow: hidden; text-overflow: ellipsis; }
+.course-selector-row .icon-btn { flex-shrink: 0; }
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 1rem; }
 .modal-content { background: white; border-radius: 12px; width: 100%; max-width: 450px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 .modal-header { padding: 1rem; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
