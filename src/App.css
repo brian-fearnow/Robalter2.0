@@ -91,8 +91,8 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 
 /* Setup Refinements */
 .player-entry-grid { display: flex; flex-direction: column; gap: 0.6rem; }
-.player-entry-row { display: grid; grid-template-columns: 1fr 44px minmax(72px, auto) 28px 28px 28px; gap: 0.25rem; align-items: center; width: 100%; }
-.player-entry-row input, .player-entry-row select { padding: 0.45rem 0.35rem; border: 1px solid var(--border-light); border-radius: 4px; font-size: 0.78rem; font-family: sans-serif; min-width: 0; width: 100%; box-sizing: border-box; }
+.player-entry-row { display: grid; grid-template-columns: 1fr 44px 80px 28px 28px 28px; gap: 0.25rem; align-items: center; width: 100%; }
+.player-entry-row input, .player-entry-row select { padding: 0.45rem 0.35rem; border: 1px solid var(--border-light); border-radius: 4px; font-size: 0.78rem; font-family: sans-serif; min-width: 0; width: 100%; box-sizing: border-box; overflow: hidden; text-overflow: ellipsis; }
 .player-entry-row input[placeholder="Idx"] { text-align: center; }
 .player-entry-row .icon-btn { padding: 3px; width: 28px; height: 28px; flex-shrink: 0; }
 
