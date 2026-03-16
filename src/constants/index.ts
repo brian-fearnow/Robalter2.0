@@ -111,6 +111,7 @@ export const STORAGE_KEYS = {
   INDEPENDENT_MATCHES: 'robalter_independentMatches',
   MANUAL_PRESSES: 'robalter_manualPresses_v2',
   IND_MANUAL_PRESSES: 'robalter_indManualPresses',
+  GHIN_TOKEN: 'robalter_ghin_token',
 } as const;
 
 // --- Defaults ---

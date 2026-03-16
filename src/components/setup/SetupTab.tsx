@@ -5,7 +5,9 @@ import { StrokeSummary } from './StrokeSummary';
 import { StakesCard } from './StakesCard';
 import { PairingsCard } from './PairingsCard';
 import { IndependentMatchesCard } from './IndependentMatchesCard';
+import { GhinLookupModal } from './GhinLookupModal';
 import { PERMANENT_COURSE_IDS } from '../../constants';
+import type { GhinGolfer } from '../../types';
 
 interface SetupTabProps {
   appState: AppState;
@@ -57,7 +59,15 @@ export function SetupTab({ appState }: SetupTabProps) {
     handleImStrokeChange,
     resetData,
     computeStrokesPerSixHoles,
+    ghinToken, ghinLookupPlayerId, setGhinLookupPlayerId, saveGhinToken, clearGhinToken,
   } = appState;
+
+  function handleSelectGolfer(golfer: GhinGolfer) {
+    if (!ghinLookupPlayerId) return;
+    updatePlayer(ghinLookupPlayerId, 'name', `${golfer.first_name} ${golfer.last_name}`);
+    updatePlayer(ghinLookupPlayerId, 'index', golfer.handicap_index);
+    setGhinLookupPlayerId(null);
+  }
 
   return (
     <div className="setup-container">
@@ -97,6 +107,7 @@ export function SetupTab({ appState }: SetupTabProps) {
               onClearPlayer={clearPlayer}
               onAddPartner={addPartner}
               onLoadPartner={loadPartner}
+              onOpenGhinLookup={setGhinLookupPlayerId}
               activePlayers={activePlayers}
             />
           ))}
@@ -202,6 +213,16 @@ export function SetupTab({ appState }: SetupTabProps) {
           <RotateCcw size={16} /> Reset Round Data
         </button>
       </div>
+
+      {ghinLookupPlayerId && (
+        <GhinLookupModal
+          ghinToken={ghinToken}
+          onSaveToken={saveGhinToken}
+          onClearToken={clearGhinToken}
+          onSelectGolfer={handleSelectGolfer}
+          onClose={() => setGhinLookupPlayerId(null)}
+        />
+      )}
     </div>
   );
 }

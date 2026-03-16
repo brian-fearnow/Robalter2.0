@@ -719,6 +719,47 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
   justify-content: center;
 }
 
+/* ── GHIN Lookup Modal ─────────────────────────────────────────── */
+.ghin-modal { max-width: 420px; }
+.ghin-modal-title { display: flex; align-items: center; gap: 6px; }
+.ghin-logo-text { font-weight: 800; color: #003087; letter-spacing: 0.05em; }
+
+.ghin-form { display: flex; flex-direction: column; gap: 12px; }
+.ghin-instructions { font-size: 0.85rem; color: #555; margin: 0; }
+.ghin-privacy-note { font-size: 0.75rem; color: #888; margin: 0; text-align: center; }
+
+.ghin-field { display: flex; flex-direction: column; gap: 4px; }
+.ghin-field label { font-size: 0.78rem; font-weight: 600; color: var(--mackenzie-green); text-transform: uppercase; letter-spacing: 0.04em; }
+.ghin-field input, .ghin-field select { padding: 0.55rem 0.7rem; border: 1.5px solid var(--border-light); border-radius: 6px; font-size: 0.95rem; }
+.ghin-field input:focus, .ghin-field select:focus { outline: none; border-color: var(--mackenzie-green); }
+
+.ghin-search-header { display: flex; justify-content: space-between; align-items: center; }
+.ghin-search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.ghin-signout-btn { background: none; border: 1px solid #ccc; border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; color: #666; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.ghin-signout-btn:hover { background: #f5f5f5; }
+
+.ghin-submit-btn { display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+.ghin-error { font-size: 0.82rem; color: #c0392b; margin: 0; padding: 6px 10px; background: #fdf2f2; border-radius: 6px; border: 1px solid #f5c6c6; }
+
+.ghin-results { border-top: 1px solid var(--border-light); padding-top: 12px; margin-top: 4px; }
+.ghin-results-count { font-size: 0.8rem; color: #666; margin: 0 0 8px 0; }
+.ghin-no-results { font-size: 0.85rem; color: #777; margin: 0; text-align: center; padding: 12px 0; }
+
+.ghin-results-list { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; }
+.ghin-result-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1.5px solid var(--border-light); border-radius: 8px; background: #fafafa; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s, border-color 0.15s; }
+.ghin-result-row:hover { background: #eef4ee; border-color: var(--mackenzie-green); }
+.ghin-result-info { display: flex; flex-direction: column; gap: 2px; }
+.ghin-result-info strong { font-size: 0.9rem; color: #1a1a1a; }
+.ghin-result-info span { font-size: 0.75rem; color: #666; }
+.ghin-result-right { display: flex; align-items: center; gap: 4px; }
+.ghin-hdcp { font-size: 1rem; font-weight: 700; color: var(--mackenzie-green); min-width: 32px; text-align: right; }
+.ghin-chevron { color: #aaa; }
+
+.icon-btn.ghin-lookup { color: #003087; }
+.icon-btn.ghin-lookup:hover { color: #004db3; background: #e8eef8; }
+
 /* Animations */
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-10px); }

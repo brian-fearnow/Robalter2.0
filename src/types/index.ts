@@ -1,3 +1,15 @@
+// --- GHIN Lookup ---
+
+export interface GhinGolfer {
+  first_name: string;
+  last_name: string;
+  ghin: string;
+  handicap_index: string;
+  club_name: string;
+  state: string;
+  association_name?: string;
+}
+
 // --- Core Domain Interfaces ---
 
 export interface Tee {

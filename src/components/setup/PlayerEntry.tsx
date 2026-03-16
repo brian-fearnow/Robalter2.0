@@ -1,4 +1,4 @@
-import { UserMinus, UserPlus } from 'lucide-react';
+import { UserMinus, UserPlus, Search } from 'lucide-react';
 import type { Player, Partner } from '../../types';
 
 interface PlayerEntryProps {
@@ -10,6 +10,7 @@ interface PlayerEntryProps {
   onClearPlayer: (id: string) => void;
   onAddPartner: (player: Player) => void;
   onLoadPartner: (playerId: string, partner: Partner) => void;
+  onOpenGhinLookup: (playerId: string) => void;
   activePlayers: Player[];
 }
 
@@ -22,6 +23,7 @@ export function PlayerEntry({
   onClearPlayer,
   onAddPartner,
   onLoadPartner,
+  onOpenGhinLookup,
   activePlayers,
 }: PlayerEntryProps) {
   return (
@@ -45,6 +47,9 @@ export function PlayerEntry({
             <option key={idx} value={idx}>{t.name}</option>
           ))}
         </select>
+        <button className="icon-btn ghin-lookup" onClick={() => onOpenGhinLookup(player.id)} title="GHIN Lookup">
+          <Search size={14} />
+        </button>
         <button className="icon-btn clear-player" onClick={() => onClearPlayer(player.id)}>
           <UserMinus size={14} />
         </button>

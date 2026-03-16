@@ -92,6 +92,22 @@ export function useAppState() {
     [courses, selectedCourseId]
   );
 
+  // --- GHIN ---
+  const [ghinToken, setGhinToken] = useState<string | null>(() =>
+    localStorage.getItem(STORAGE_KEYS.GHIN_TOKEN)
+  );
+  const [ghinLookupPlayerId, setGhinLookupPlayerId] = useState<string | null>(null);
+
+  const saveGhinToken = useCallback((token: string) => {
+    localStorage.setItem(STORAGE_KEYS.GHIN_TOKEN, token);
+    setGhinToken(token);
+  }, []);
+
+  const clearGhinToken = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEYS.GHIN_TOKEN);
+    setGhinToken(null);
+  }, []);
+
   // --- Game Mode ---
   const [gameMode, setGameMode] = useState<GameMode>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.GAME_MODE);
@@ -684,6 +700,8 @@ export function useAppState() {
   }, []);
 
   return {
+    // GHIN
+    ghinToken, ghinLookupPlayerId, setGhinLookupPlayerId, saveGhinToken, clearGhinToken,
     // State
     courses, setCourses,
     selectedCourseId, setSelectedCourseId,
