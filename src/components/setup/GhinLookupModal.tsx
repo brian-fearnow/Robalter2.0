@@ -21,6 +21,8 @@ interface GhinLookupModalProps {
   onClearToken: () => void;
   onSelectGolfer: (golfer: GhinGolfer) => void;
   onClose: () => void;
+  initialFirstName?: string;
+  initialLastName?: string;
 }
 
 export function GhinLookupModal({
@@ -29,6 +31,8 @@ export function GhinLookupModal({
   onClearToken,
   onSelectGolfer,
   onClose,
+  initialFirstName = '',
+  initialLastName = '',
 }: GhinLookupModalProps) {
   // Login form
   const [email, setEmail] = useState('');
@@ -37,8 +41,8 @@ export function GhinLookupModal({
   const [loginLoading, setLoginLoading] = useState(false);
 
   // Search form
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [firstName, setFirstName] = useState(initialFirstName);
+  const [lastName, setLastName] = useState(initialLastName);
   const [state, setState] = useState('');
   const [searchError, setSearchError] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);

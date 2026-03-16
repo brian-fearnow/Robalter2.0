@@ -66,6 +66,16 @@ export function SetupTab({ appState }: SetupTabProps) {
 
   // Track GHIN numbers for players looked up this session, so we can attach them when saving a partner
   const [pendingGhin, setPendingGhin] = useState<Record<string, string>>({});
+  const [ghinInitialName, setGhinInitialName] = useState<{ first: string; last: string }>({ first: '', last: '' });
+
+  function handleOpenGhinLookup(playerId: string) {
+    const player = activePlayers.find(p => p.id === playerId);
+    const parts = (player?.name ?? '').trim().split(/\s+/);
+    const first = parts.length > 1 ? parts[0] : '';
+    const last = parts.length > 1 ? parts.slice(1).join(' ') : parts[0] ?? '';
+    setGhinInitialName({ first, last });
+    setGhinLookupPlayerId(playerId);
+  }
 
   function handleSelectGolfer(golfer: GhinGolfer) {
     if (!ghinLookupPlayerId) return;
@@ -117,7 +127,7 @@ export function SetupTab({ appState }: SetupTabProps) {
               onClearPlayer={clearPlayer}
               onAddPartner={handleAddPartner}
               onLoadPartner={loadPartner}
-              onOpenGhinLookup={setGhinLookupPlayerId}
+              onOpenGhinLookup={handleOpenGhinLookup}
               activePlayers={activePlayers}
             />
           ))}
@@ -248,6 +258,8 @@ export function SetupTab({ appState }: SetupTabProps) {
           onClearToken={clearGhinToken}
           onSelectGolfer={handleSelectGolfer}
           onClose={() => setGhinLookupPlayerId(null)}
+          initialFirstName={ghinInitialName.first}
+          initialLastName={ghinInitialName.last}
         />
       )}
     </div>
