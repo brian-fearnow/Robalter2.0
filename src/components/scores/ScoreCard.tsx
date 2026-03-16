@@ -1,0 +1,191 @@
+import type { AppState } from '../../hooks/useAppState';
+
+interface ScoreCardProps {
+  appState: AppState;
+}
+
+export function ScoreCard({ appState }: ScoreCardProps) {
+  const {
+    selectedCourse,
+    scorecardPlayers,
+    gameMode,
+    scores,
+    settings,
+    setScore,
+    getNetScore,
+    getPlayerScoreTotal,
+    getPlayerHoleListTotal,
+    computeStrokesForHole,
+    computeStrokesPerSixHoles,
+    computeBaseballPoints,
+    baselineCH,
+  } = appState;
+
+  const renderStrokes = (strokes: number) => {
+    if (strokes === 0) return null;
+    const isPlus = strokes < 0;
+    const absStrokes = Math.abs(strokes);
+    const frac = absStrokes % 1 !== 0 ? '\u00BD' : '';
+    const whole = Math.floor(absStrokes);
+
+    if (isPlus) {
+      return <span className="stroke-marker plus">+{whole}{frac}</span>;
+    } else {
+      const stars = Array.from({ length: whole }, () => '*').join('');
+      return <span className="stroke-marker">{stars}{frac}</span>;
+    }
+  };
+
+  const front9 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const back9 = [10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+  return (
+    <div className="scorecard-view" style={{ '--player-count': scorecardPlayers.length || 1 } as React.CSSProperties}>
+      {/* Fixed header */}
+      <div className="scorecard-header-fixed">
+        <div className="h-cell">Hole</div>
+        {scorecardPlayers.map(p => {
+          const displayStrokes = (gameMode === 'sixes' || gameMode === 'wheel')
+            ? computeStrokesPerSixHoles(p)
+            : (settings.useManualStrokes ? p.manualRelativeStrokes : p.courseHandicap - baselineCH);
+          return (
+            <div key={p.id} className="p-cell">
+              <div className="p-name">{p.name.split(' ')[0]}</div>
+              <div className="p-strokes">{displayStrokes}</div>
+            </div>
+          );
+        })}
+        {gameMode === 'baseball' && <div className="p-cell bb-pts-header">Pts</div>}
+      </div>
+
+      {/* Scrollable rows */}
+      <div className="scorecard-scroll-area">
+        {selectedCourse.holes.map(h => (
+          <div key={h.number} className="score-row">
+            <div className="h-info">
+              <strong>{h.number}</strong>
+              <span>P{h.par}/H{h.handicap}</span>
+            </div>
+            {scorecardPlayers.map(p => {
+              const strokes = computeStrokesForHole(p.id, h.number);
+              const netVal = getNetScore(p.id, h.number);
+              return (
+                <div key={p.id} className="input-cell">
+                  <div className="input-wrapper">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={scores[p.id]?.[h.number] || ''}
+                      onChange={e => setScore(p.id, h.number, e.target.value)}
+                      disabled={!p.name}
+                    />
+                    {renderStrokes(strokes)}
+                  </div>
+                  <span className="net">{netVal ?? ''}</span>
+                </div>
+              );
+            })}
+            {gameMode === 'baseball' && (
+              <div className="bb-pts-cell">
+                {(() => {
+                  let pts = computeBaseballPoints(h.number);
+                  if (pts.every(p => p === 0)) return null;
+                  if (h.number >= 10 && settings.useBaseballDoubleBackNine) {
+                    pts = pts.map(p => p * 2) as [number, number, number];
+                  }
+                  return (
+                    <div className="bb-pts-stack">
+                      {pts.map((p, i) => <span key={i}>{p}</span>)}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Front 9 total */}
+        <div className="score-row total-row-sub">
+          <div className="h-info"><strong>F9</strong></div>
+          {scorecardPlayers.map(p => (
+            <div key={p.id} className="input-cell total-cell">
+              <strong>{getPlayerHoleListTotal(p.id, front9)}</strong>
+            </div>
+          ))}
+          {gameMode === 'baseball' && (
+            <div className="bb-pts-cell total">
+              <strong>{(() => {
+                let sum = 0;
+                for (let h = 1; h <= 9; h++) computeBaseballPoints(h).forEach(p => { sum += p; });
+                return sum;
+              })()}</strong>
+            </div>
+          )}
+        </div>
+
+        {/* Back 9 total */}
+        <div className="score-row total-row-sub">
+          <div className="h-info"><strong>B9</strong></div>
+          {scorecardPlayers.map(p => (
+            <div key={p.id} className="input-cell total-cell">
+              <strong>{getPlayerHoleListTotal(p.id, back9)}</strong>
+            </div>
+          ))}
+          {gameMode === 'baseball' && (
+            <div className="bb-pts-cell total">
+              <strong>{(() => {
+                let sum = 0;
+                for (let h = 10; h <= 18; h++) {
+                  let pts = computeBaseballPoints(h);
+                  if (settings.useBaseballDoubleBackNine) pts = pts.map(p => p * 2) as [number, number, number];
+                  pts.forEach(p => { sum += p; });
+                }
+                return sum;
+              })()}</strong>
+            </div>
+          )}
+        </div>
+
+        {/* Grand total */}
+        <div className="score-row total-row">
+          <div className="h-info"><strong>TOT</strong></div>
+          {scorecardPlayers.map(p => (
+            <div key={p.id} className="input-cell total-cell">
+              <strong>{getPlayerScoreTotal(p.id)}</strong>
+            </div>
+          ))}
+          {gameMode === 'baseball' && (
+            <div className="bb-pts-cell total">
+              <strong>{(() => {
+                let sum = 0;
+                for (let h = 1; h <= 18; h++) {
+                  let pts = computeBaseballPoints(h);
+                  if (h >= 10 && settings.useBaseballDoubleBackNine) pts = pts.map(p => p * 2) as [number, number, number];
+                  pts.forEach(p => { sum += p; });
+                }
+                return sum;
+              })()}</strong>
+            </div>
+          )}
+        </div>
+
+        {/* Net total */}
+        <div className="score-row net-total-row">
+          <div className="h-info"><strong>NET</strong></div>
+          {scorecardPlayers.map(p => {
+            const gross = getPlayerScoreTotal(p.id);
+            const net = gross > 0 ? gross - p.courseHandicap : 0;
+            return (
+              <div key={p.id} className="input-cell total-cell">
+                <strong style={{ color: 'var(--mackenzie-green)' }}>{gross > 0 ? net : ''}</strong>
+              </div>
+            );
+          })}
+          {gameMode === 'baseball' && <div className="bb-pts-cell"></div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+import type React from 'react';
