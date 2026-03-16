@@ -108,11 +108,9 @@ export function SetupTab({ appState }: SetupTabProps) {
           <button className="icon-btn add-course" onClick={startNewCourse} title="Add Course">
             <Plus size={14} />
           </button>
-          {ghinToken && (
-            <button className="icon-btn ghin-import-course" onClick={() => setGhinCourseModalOpen(true)} title="Import course from GHIN">
-              <Download size={14} />
-            </button>
-          )}
+          <button className="icon-btn ghin-import-course" onClick={() => setGhinCourseModalOpen(true)} title="Import course from GHIN">
+            <Download size={14} />
+          </button>
           {!PERMANENT_COURSE_IDS.includes(selectedCourseId as typeof PERMANENT_COURSE_IDS[number]) && (
             <button className="icon-btn remove-course" onClick={() => deleteCourse(selectedCourseId)} title="Remove Course">
               <Trash2 size={14} />
@@ -260,9 +258,10 @@ export function SetupTab({ appState }: SetupTabProps) {
         </button>
       </div>
 
-      {ghinCourseModalOpen && ghinToken && (
+      {ghinCourseModalOpen && (
         <GhinCourseLookupModal
           ghinToken={ghinToken}
+          onSaveToken={saveGhinToken}
           onImportCourse={importCourse}
           onClearToken={clearGhinToken}
           onClose={() => setGhinCourseModalOpen(false)}
