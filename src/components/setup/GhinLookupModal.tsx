@@ -43,7 +43,7 @@ export function GhinLookupModal({
   // Search form
   const [firstName, setFirstName] = useState(initialFirstName);
   const [lastName, setLastName] = useState(initialLastName);
-  const [state, setState] = useState('');
+  const [state, setState] = useState('CA');
   const [searchError, setSearchError] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
   const [results, setResults] = useState<GhinGolfer[] | null>(null);

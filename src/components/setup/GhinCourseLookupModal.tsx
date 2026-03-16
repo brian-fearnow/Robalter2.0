@@ -37,7 +37,7 @@ export function GhinCourseLookupModal({
   onClose,
 }: GhinCourseLookupModalProps) {
   const [name, setName] = useState('');
-  const [state, setState] = useState('');
+  const [state, setState] = useState('CA');
   const [searchError, setSearchError] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
   const [results, setResults] = useState<CourseResult[] | null>(null);
