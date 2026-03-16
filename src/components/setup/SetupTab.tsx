@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, MapPin, Edit2, Plus, Trash2, UserCheck, ChevronDown, ChevronUp, RotateCcw, RefreshCw } from 'lucide-react';
+import { User, MapPin, Edit2, Plus, Trash2, UserCheck, ChevronDown, ChevronUp, RotateCcw, RefreshCw, Download } from 'lucide-react';
 import type { AppState } from '../../hooks/useAppState';
 import { PlayerEntry } from './PlayerEntry';
 import { StrokeSummary } from './StrokeSummary';
@@ -7,6 +7,7 @@ import { StakesCard } from './StakesCard';
 import { PairingsCard } from './PairingsCard';
 import { IndependentMatchesCard } from './IndependentMatchesCard';
 import { GhinLookupModal } from './GhinLookupModal';
+import { GhinCourseLookupModal } from './GhinCourseLookupModal';
 import { PERMANENT_COURSE_IDS } from '../../constants';
 import type { GhinGolfer } from '../../types';
 
@@ -62,7 +63,10 @@ export function SetupTab({ appState }: SetupTabProps) {
     computeStrokesPerSixHoles,
     ghinToken, ghinLookupPlayerId, setGhinLookupPlayerId, saveGhinToken, clearGhinToken,
     refreshPartnerIndex, partnerRefreshing,
+    importCourse,
   } = appState;
+
+  const [ghinCourseModalOpen, setGhinCourseModalOpen] = useState(false);
 
   // Track GHIN numbers for players looked up this session, so we can attach them when saving a partner
   const [pendingGhin, setPendingGhin] = useState<Record<string, string>>({});
@@ -104,6 +108,11 @@ export function SetupTab({ appState }: SetupTabProps) {
           <button className="icon-btn add-course" onClick={startNewCourse} title="Add Course">
             <Plus size={14} />
           </button>
+          {ghinToken && (
+            <button className="icon-btn ghin-import-course" onClick={() => setGhinCourseModalOpen(true)} title="Import course from GHIN">
+              <Download size={14} />
+            </button>
+          )}
           {!PERMANENT_COURSE_IDS.includes(selectedCourseId as typeof PERMANENT_COURSE_IDS[number]) && (
             <button className="icon-btn remove-course" onClick={() => deleteCourse(selectedCourseId)} title="Remove Course">
               <Trash2 size={14} />
@@ -250,6 +259,15 @@ export function SetupTab({ appState }: SetupTabProps) {
           <RotateCcw size={16} /> Reset Round Data
         </button>
       </div>
+
+      {ghinCourseModalOpen && ghinToken && (
+        <GhinCourseLookupModal
+          ghinToken={ghinToken}
+          onImportCourse={importCourse}
+          onClearToken={clearGhinToken}
+          onClose={() => setGhinCourseModalOpen(false)}
+        />
+      )}
 
       {ghinLookupPlayerId && (
         <GhinLookupModal

@@ -290,6 +290,12 @@ export function useAppState() {
     setIsCourseModalOpen(true);
   }, []);
 
+  const importCourse = useCallback((courseData: Omit<Course, 'id'>) => {
+    const newCourse: Course = { id: Date.now().toString(), ...courseData };
+    setCourses(prev => [...prev, newCourse]);
+    setSelectedCourseId(newCourse.id);
+  }, []);
+
   const startNewCourse = useCallback(() => {
     setEditingCourse({
       id: Date.now().toString(),
@@ -775,6 +781,7 @@ export function useAppState() {
     saveCourse,
     editCourse,
     startNewCourse,
+    importCourse,
     deleteCourse,
     handleGameModeChange,
     addIndependentMatch,
