@@ -132,32 +132,39 @@ export function SetupTab({ appState }: SetupTabProps) {
             {visibleSections.partners ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </div>
           {visibleSections.partners && (
-            <div className="partners-grid">
-              {partners.map(pt => (
-                <div key={pt.name} className="partner-item-row">
-                  <span className="pt-name">{pt.name}</span>
-                  <input
-                    className="pt-index-input"
-                    value={pt.indexInput}
-                    onChange={e => updatePartnerIndex(pt.name, e.target.value)}
-                    title="Handicap Index"
-                  />
-                  {pt.ghin && ghinToken && (
-                    <button
-                      className="icon-btn refresh-partner-index"
-                      onClick={() => refreshPartnerIndex(pt)}
-                      disabled={partnerRefreshing.has(pt.name)}
-                      title="Update index from GHIN"
-                    >
-                      <RefreshCw size={12} className={partnerRefreshing.has(pt.name) ? 'spinning' : ''} />
-                    </button>
-                  )}
-                  <button className="icon-btn delete-partner" onClick={() => deletePartner(pt.name)}>
-                    <Trash2 size={12} />
+            <>
+              {ghinToken && partners.some(pt => pt.ghin) && (
+                <div className="partners-refresh-row">
+                  <button
+                    className="partners-update-all-btn"
+                    onClick={() => partners.filter(pt => pt.ghin).forEach(pt => refreshPartnerIndex(pt))}
+                    disabled={partnerRefreshing.size > 0}
+                  >
+                    <RefreshCw size={12} className={partnerRefreshing.size > 0 ? 'spinning' : ''} />
+                    {partnerRefreshing.size > 0 ? 'Updating…' : 'Update GHIN Indexes'}
                   </button>
                 </div>
-              ))}
-            </div>
+              )}
+              <div className="partners-grid">
+                {partners.map(pt => (
+                  <div key={pt.name} className="partner-item-row">
+                    <span className="pt-name">
+                      {pt.name}
+                      {pt.ghin && <span className="pt-ghin-badge">GHIN</span>}
+                    </span>
+                    <input
+                      className="pt-index-input"
+                      value={pt.indexInput}
+                      onChange={e => updatePartnerIndex(pt.name, e.target.value)}
+                      title="Handicap Index"
+                    />
+                    <button className="icon-btn delete-partner" onClick={() => deletePartner(pt.name)}>
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       )}
