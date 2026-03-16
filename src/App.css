@@ -759,6 +759,11 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 
 .icon-btn.ghin-lookup { color: #003087; }
 .icon-btn.ghin-lookup:hover { color: #004db3; background: #e8eef8; }
+.icon-btn.refresh-partner-index { color: #003087; }
+.icon-btn.refresh-partner-index:hover:not(:disabled) { color: #004db3; background: #e8eef8; }
+.icon-btn.refresh-partner-index:disabled { opacity: 0.5; cursor: default; }
+.spinning { animation: spin 0.8s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* Animations */
 @keyframes slideDown {

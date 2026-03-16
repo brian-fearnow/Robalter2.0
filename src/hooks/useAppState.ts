@@ -385,9 +385,9 @@ export function useAppState() {
     }));
   }, [selectedCourse]);
 
-  const addPartner = useCallback((player: Player) => {
+  const addPartner = useCallback((player: Player, ghin?: string) => {
     if (!player.name) return;
-    const newPartner: Partner = { name: player.name, index: player.index, indexInput: player.indexInput, selectedTeeIndex: player.selectedTeeIndex };
+    const newPartner: Partner = { name: player.name, index: player.index, indexInput: player.indexInput, selectedTeeIndex: player.selectedTeeIndex, ghin };
     setPartners(prev => {
       if (prev.some(pt => pt.name === player.name)) {
         return prev.map(pt => pt.name === player.name ? newPartner : pt);
@@ -395,6 +395,41 @@ export function useAppState() {
       return [...prev, newPartner];
     });
   }, []);
+
+  const [partnerRefreshing, setPartnerRefreshing] = useState<Set<string>>(new Set());
+
+  const refreshPartnerIndex = useCallback(async (partner: Partner) => {
+    if (!partner.ghin || !ghinToken) return;
+    setPartnerRefreshing(prev => new Set(prev).add(partner.name));
+    try {
+      const nameParts = partner.name.trim().split(' ');
+      const lastName = nameParts.slice(1).join(' ') || nameParts[0];
+      const firstName = nameParts.length > 1 ? nameParts[0] : '';
+      const qs = new URLSearchParams({ token: ghinToken, lastName });
+      if (firstName) qs.set('firstName', firstName);
+      const res = await fetch(`/api/ghin-search?${qs.toString()}`);
+      const data = await res.json() as { golfers?: Array<{ ghin: string; handicap_index: string }>; error?: string };
+      if (res.status === 401 || data.error === 'token_expired') {
+        clearGhinToken();
+        return;
+      }
+      const match = (data.golfers ?? []).find(g => g.ghin === partner.ghin);
+      if (!match) return;
+      const isPlusHandicap = match.handicap_index.startsWith('+');
+      const numValue = parseFloat(match.handicap_index.replace('+', '')) || 0;
+      const newIndex = isPlusHandicap ? -numValue : numValue;
+      setPartners(prev => prev.map(pt =>
+        pt.name === partner.name ? { ...pt, index: newIndex, indexInput: match.handicap_index } : pt
+      ));
+      setPlayers(prev => prev.map(pl =>
+        pl.name === partner.name ? { ...pl, index: newIndex, indexInput: match.handicap_index } : pl
+      ));
+    } catch {
+      // silently fail
+    } finally {
+      setPartnerRefreshing(prev => { const s = new Set(prev); s.delete(partner.name); return s; });
+    }
+  }, [ghinToken, clearGhinToken]);
 
   const deletePartner = useCallback((name: string) => {
     setPartners(prev => prev.filter(pt => pt.name !== name));
@@ -749,6 +784,8 @@ export function useAppState() {
     addPartner,
     deletePartner,
     loadPartner,
+    refreshPartnerIndex,
+    partnerRefreshing,
     setScore,
     addSegmentManualPress,
     addIndManualPress,

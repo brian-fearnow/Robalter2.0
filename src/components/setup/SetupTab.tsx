@@ -1,4 +1,5 @@
-import { User, MapPin, Edit2, Plus, Trash2, UserCheck, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
+import { User, MapPin, Edit2, Plus, Trash2, UserCheck, ChevronDown, ChevronUp, RotateCcw, RefreshCw } from 'lucide-react';
 import type { AppState } from '../../hooks/useAppState';
 import { PlayerEntry } from './PlayerEntry';
 import { StrokeSummary } from './StrokeSummary';
@@ -60,13 +61,22 @@ export function SetupTab({ appState }: SetupTabProps) {
     resetData,
     computeStrokesPerSixHoles,
     ghinToken, ghinLookupPlayerId, setGhinLookupPlayerId, saveGhinToken, clearGhinToken,
+    refreshPartnerIndex, partnerRefreshing,
   } = appState;
+
+  // Track GHIN numbers for players looked up this session, so we can attach them when saving a partner
+  const [pendingGhin, setPendingGhin] = useState<Record<string, string>>({});
 
   function handleSelectGolfer(golfer: GhinGolfer) {
     if (!ghinLookupPlayerId) return;
     updatePlayer(ghinLookupPlayerId, 'name', `${golfer.first_name} ${golfer.last_name}`);
     updatePlayer(ghinLookupPlayerId, 'index', golfer.handicap_index);
+    setPendingGhin(prev => ({ ...prev, [ghinLookupPlayerId]: golfer.ghin }));
     setGhinLookupPlayerId(null);
+  }
+
+  function handleAddPartner(player: Parameters<typeof addPartner>[0]) {
+    addPartner(player, pendingGhin[player.id]);
   }
 
   return (
@@ -105,7 +115,7 @@ export function SetupTab({ appState }: SetupTabProps) {
               teeOptions={selectedCourse.tees}
               onUpdatePlayer={updatePlayer}
               onClearPlayer={clearPlayer}
-              onAddPartner={addPartner}
+              onAddPartner={handleAddPartner}
               onLoadPartner={loadPartner}
               onOpenGhinLookup={setGhinLookupPlayerId}
               activePlayers={activePlayers}
@@ -132,6 +142,16 @@ export function SetupTab({ appState }: SetupTabProps) {
                     onChange={e => updatePartnerIndex(pt.name, e.target.value)}
                     title="Handicap Index"
                   />
+                  {pt.ghin && ghinToken && (
+                    <button
+                      className="icon-btn refresh-partner-index"
+                      onClick={() => refreshPartnerIndex(pt)}
+                      disabled={partnerRefreshing.has(pt.name)}
+                      title="Update index from GHIN"
+                    >
+                      <RefreshCw size={12} className={partnerRefreshing.has(pt.name) ? 'spinning' : ''} />
+                    </button>
+                  )}
                   <button className="icon-btn delete-partner" onClick={() => deletePartner(pt.name)}>
                     <Trash2 size={12} />
                   </button>

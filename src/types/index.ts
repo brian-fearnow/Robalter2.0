@@ -46,6 +46,7 @@ export interface Partner {
   index: number;
   indexInput: string;
   selectedTeeIndex: number;
+  ghin?: string;
 }
 
 export interface Score {
