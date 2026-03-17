@@ -19,21 +19,26 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const lastName = params.get('lastName') ?? '';
   const state = params.get('state') ?? '';
   const page = params.get('page') ?? '1';
+  const ghin = params.get('ghin') ?? '';
 
-  if (!token || !lastName) {
+  if (!token || (!lastName && !ghin)) {
     res.statusCode = 400;
-    res.end(JSON.stringify({ error: 'token and lastName are required' }));
+    res.end(JSON.stringify({ error: 'token and either lastName or ghin are required' }));
     return;
   }
 
   try {
     const qs = new URLSearchParams({
-      last_name: lastName,
-      first_name: firstName,
       page,
-      per_page: '20',
+      per_page: ghin ? '1' : '20',
     });
-    if (state) qs.set('state', state);
+    if (ghin) {
+      qs.set('golfer_id', ghin);
+    } else {
+      qs.set('last_name', lastName);
+      qs.set('first_name', firstName);
+      if (state) qs.set('state', state);
+    }
 
     const searchRes = await fetch(`${GHIN_API}/golfers/search.json?${qs.toString()}`, {
       headers: {

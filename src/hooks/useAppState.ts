@@ -456,18 +456,14 @@ export function useAppState() {
     if (!partner.ghin || !ghinToken) return;
     setPartnerRefreshing(prev => new Set(prev).add(partner.name));
     try {
-      const nameParts = partner.name.trim().split(' ');
-      const lastName = nameParts.slice(1).join(' ') || nameParts[0];
-      const firstName = nameParts.length > 1 ? nameParts[0] : '';
-      const qs = new URLSearchParams({ token: ghinToken, lastName });
-      if (firstName) qs.set('firstName', firstName);
+      const qs = new URLSearchParams({ token: ghinToken, ghin: partner.ghin });
       const res = await fetch(`/api/ghin-search?${qs.toString()}`);
       const data = await res.json() as { golfers?: Array<{ ghin: string; handicap_index: string }>; error?: string };
       if (res.status === 401 || data.error === 'token_expired') {
         clearGhinToken();
         return;
       }
-      const match = (data.golfers ?? []).find(g => g.ghin === partner.ghin);
+      const match = (data.golfers ?? [])[0];
       if (!match) return;
       const isPlusHandicap = match.handicap_index.startsWith('+');
       const numValue = parseFloat(match.handicap_index.replace('+', '')) || 0;
