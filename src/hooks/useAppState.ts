@@ -227,6 +227,16 @@ export function useAppState() {
     localStorage.setItem(STORAGE_KEYS.SELECTED_COURSE, selectedCourseId);
   }, [selectedCourseId]);
 
+  // Recalculate course handicaps for all named players when the course changes.
+  useEffect(() => {
+    setPlayers(prev => prev.map(p => {
+      if (!p.name) return p;
+      const teeIndex = p.selectedTeeIndex < selectedCourse.tees.length ? p.selectedTeeIndex : 0;
+      const tee = selectedCourse.tees[teeIndex];
+      return { ...p, selectedTeeIndex: teeIndex, courseHandicap: calculateCourseHandicap(p.index, tee) };
+    }));
+  }, [selectedCourse]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // --- Batched/debounced localStorage saves ---
   useEffect(() => {
     const timer = setTimeout(() => {
