@@ -29,29 +29,32 @@ export function StrokeSummary({
   computeStrokesPerSixHoles,
 }: StrokeSummaryProps) {
   const isDividedSixes = (gameMode === 'sixes' || gameMode === 'wheel') && settings.strokeAllocation === 'divided';
+  const isIndependent = gameMode === 'independent';
 
   return (
     <div className="card stroke-summary-card">
       <div className="collapsible-header" onClick={onToggleSummary}>
         <h3><ListChecks size={14} /> STROKE SUMMARY</h3>
-        <div
-          className="slider-toggle-container"
-          onClick={e => { e.stopPropagation(); onManualStrokesToggle(); }}
-        >
-          <span>Adjust Strokes</span>
-          <div className={`slider-track ${settings.useManualStrokes ? 'active' : ''}`}>
-            <div className="slider-thumb" />
+        {!isIndependent && (
+          <div
+            className="slider-toggle-container"
+            onClick={e => { e.stopPropagation(); onManualStrokesToggle(); }}
+          >
+            <span>Adjust Strokes</span>
+            <div className={`slider-track ${settings.useManualStrokes ? 'active' : ''}`}>
+              <div className="slider-thumb" />
+            </div>
           </div>
-        </div>
+        )}
         {visibleSummary ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </div>
       {visibleSummary && (
         <div className="summary-grid">
           <div className="summary-header">
             <span>Player</span>
-            <span>CH</span>
-            <span>{isDividedSixes ? 'Rel' : 'Strokes'}</span>
-            {isDividedSixes && <span>Per 6</span>}
+            <span>Course HDCP</span>
+            {!isIndependent && <span>{isDividedSixes ? 'Rel' : 'Strokes'}</span>}
+            {!isIndependent && isDividedSixes && <span>Per 6</span>}
           </div>
           {activePlayers.filter(p => p.name).map(p => (
             <div key={p.id} className="summary-row">
@@ -59,24 +62,26 @@ export function StrokeSummary({
               <span>{p.courseHandicap}</span>
 
               {/* Column 3 */}
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                {(settings.useManualStrokes && (!isDividedSixes)) ? (
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    className="manual-stroke-input"
-                    value={strokeSummaryInputs[p.id] !== undefined ? strokeSummaryInputs[p.id] : p.manualRelativeStrokes.toString()}
-                    onChange={e => onStrokeSummaryInputChange(p.id, e.target.value)}
-                    onBlur={() => onFinalizeDecimalEntry(p.id, true)}
-                    onKeyDown={e => e.key === 'Enter' && onFinalizeDecimalEntry(p.id, true)}
-                  />
-                ) : (
-                  <span>{p.courseHandicap - baselineCH}</span>
-                )}
-              </div>
+              {!isIndependent && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  {(settings.useManualStrokes && (!isDividedSixes)) ? (
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      className="manual-stroke-input"
+                      value={strokeSummaryInputs[p.id] !== undefined ? strokeSummaryInputs[p.id] : p.manualRelativeStrokes.toString()}
+                      onChange={e => onStrokeSummaryInputChange(p.id, e.target.value)}
+                      onBlur={() => onFinalizeDecimalEntry(p.id, true)}
+                      onKeyDown={e => e.key === 'Enter' && onFinalizeDecimalEntry(p.id, true)}
+                    />
+                  ) : (
+                    <span>{p.courseHandicap - baselineCH}</span>
+                  )}
+                </div>
+              )}
 
               {/* Column 4 (Divided Sixes only) */}
-              {isDividedSixes && (
+              {!isIndependent && isDividedSixes && (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   {settings.useManualStrokes ? (
                     <input

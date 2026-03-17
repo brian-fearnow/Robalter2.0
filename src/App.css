@@ -106,6 +106,8 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 /* Summary Grid */
 .summary-grid { display: flex; flex-direction: column; gap: 4px; font-family: sans-serif; }  
 .summary-header { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 1fr; font-size: 0.55rem; color: #888; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+.summary-header span { text-align: center; }
+.summary-header span:first-child { text-align: left; }
 .summary-row { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 1fr; font-size: 0.8rem; padding: 6px 0; border-bottom: 1px solid #f9f9f9; align-items: center; }
 .summary-row strong { color: var(--mackenzie-green); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .summary-row span { color: #555; text-align: center; }

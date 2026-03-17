@@ -131,7 +131,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </section>
           )}
 
-          {gameMode !== 'book-it' && gameMode !== 'wolf' && (
+          {gameMode !== 'book-it' && gameMode !== 'wolf' && gameMode !== 'independent' && (
             <section>
               <h4>Baseline Strokes</h4>
               <p>The best player in the group establishes the 0-stroke baseline. All other players receive strokes relative to this baseline.</p>
@@ -145,7 +145,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </section>
           )}
 
-          {gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && settings.strokeAllocation === 'divided' ? (
+          {gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && gameMode !== 'independent' && settings.strokeAllocation === 'divided' ? (
             <section>
               <h4>Sixes Allocation (Divided)</h4>
               <p>Total relative strokes are divided by 3 for each six-hole match.</p>
@@ -157,14 +157,14 @@ export function RulesTab({ appState }: RulesTabProps) {
                 )}
               </ul>
             </section>
-          ) : (gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
+          ) : (gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && gameMode !== 'independent' && (
             <section>
               <h4>Stroke Allocation (Handicap Ranking)</h4>
               <p>Strokes are applied across all 18 holes based on their handicap ranking (1-18).</p>
             </section>
           ))}
 
-          {gameMode !== 'book-it' && gameMode !== 'wolf' && (
+          {gameMode !== 'book-it' && gameMode !== 'wolf' && gameMode !== 'independent' && (
             <section>
               <h4>Betting & Tied Holes</h4>
               <p>
@@ -175,7 +175,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </section>
           )}
 
-          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && gameMode !== 'independent' && (
             <section>
               <h4>Auto-Presses</h4>
               <p>
@@ -315,7 +315,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </>
           )}
 
-          {gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
+          {gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && gameMode !== 'independent' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Stroke Allocation</strong>
@@ -334,7 +334,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {settings.strokeAllocation === 'divided' && gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
+          {settings.strokeAllocation === 'divided' && gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && gameMode !== 'independent' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Half Strokes</strong>
@@ -349,7 +349,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && gameMode !== 'independent' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Second Ball Tie-Breaker</strong>
@@ -364,7 +364,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && gameMode !== 'independent' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Auto-Press</strong>
@@ -379,7 +379,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && settings.useAutoPress && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && gameMode !== 'independent' && settings.useAutoPress && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Auto-Press Trigger</strong>
