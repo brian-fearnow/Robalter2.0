@@ -249,6 +249,13 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .modal-content { background: white; border-radius: 12px; width: 100%; max-width: 450px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 .modal-header { padding: 1rem; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
 .modal-header h2 { font-size: 1.1rem; color: var(--mackenzie-green); }
+.modal-header h3 { font-size: 1rem; color: var(--mackenzie-green); margin: 0; }
+.info-modal { max-width: 380px; }
+.info-list { list-style: none; padding: 1rem; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.info-list li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.875rem; line-height: 1.4; }
+.info-list li svg { flex-shrink: 0; margin-top: 2px; color: var(--mackenzie-green); }
+.info-btn { opacity: 0.5; vertical-align: middle; margin-left: 4px; }
+.info-btn:hover { opacity: 1; }
 .modal-body { padding: 1rem; overflow-y: auto; flex: 1; }
 .modal-footer { padding: 1rem; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 10px; }
 .editor-section { margin-top: 1.5rem; }
@@ -775,4 +782,62 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Book-It Scorecard */
+.score-row.mid-segment { background: rgba(0, 0, 0, 0.012); }
+.booked-hole { background: rgba(0, 75, 40, 0.08) !important; }
+.book-row { display: flex; align-items: center; justify-content: space-between; gap: 2px; min-height: 16px; }
+.book-btn {
+  background: none; border: none; padding: 0 2px; cursor: pointer;
+  font-size: 0.9rem; line-height: 1; color: #bbb; transition: color 0.15s;
+}
+.book-btn.booked { color: var(--mackenzie-green); }
+.book-btn:disabled { opacity: 0.3; cursor: default; }
+.book-btn:not(:disabled):hover { color: var(--mackenzie-green); }
+.booked-count { font-size: 0.65rem !important; font-weight: 700; }
+.booked-count.booked-full { color: var(--mackenzie-green) !important; }
+.setting-number-input {
+  width: 52px; height: 30px; text-align: center; border: 1px solid var(--border-light);
+  border-radius: 6px; font-size: 0.9rem; font-weight: 700; color: var(--text-dark); background: white;
+}
+.setting-number-input:focus { outline: none; border-color: var(--mackenzie-green); }
+.setting-number-derived {
+  width: 52px; height: 30px; display: flex; align-items: center; justify-content: center;
+  border: 1px dashed var(--border-light); border-radius: 6px; font-size: 0.9rem; font-weight: 700;
+  color: var(--mackenzie-green); background: rgba(0, 75, 40, 0.05);
+}
+
+/* Book-It Results */
+.book-it-player-block {
+  border: 1px solid var(--border-light); border-radius: 8px; padding: 10px; margin-bottom: 10px;
+}
+.book-it-player-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+}
+.book-it-player-header strong { font-size: 0.95rem; }
+.book-it-count { font-size: 0.75rem; color: #666; background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 10px; }
+.book-it-count.booked-full { background: rgba(0, 75, 40, 0.12); color: var(--mackenzie-green); font-weight: 700; }
+.book-it-remaining { font-size: 0.7rem; color: #e07b00; font-style: italic; }
+.book-it-holes-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+.book-it-hole-row {
+  display: grid; grid-template-columns: 30px 30px 30px 40px;
+  font-size: 0.78rem; padding: 2px 4px; border-radius: 4px; align-items: center; gap: 4px;
+}
+.book-it-hole-row.total-row { border-top: 1px solid var(--border-light); margin-top: 2px; padding-top: 4px; }
+.bi-hole-num { color: #888; font-weight: 600; }
+.bi-gross { text-align: center; color: #555; }
+.bi-net { text-align: center; color: #333; font-weight: 600; }
+.bi-to-par { text-align: right; font-weight: 700; }
+.bi-to-par.under { color: var(--mackenzie-green); }
+.bi-to-par.over { color: #c0392b; }
+.bi-to-par.even { color: #555; }
+.book-it-total-par { margin-left: auto; font-size: 0.82rem; font-weight: 700; }
+.book-it-total-par.under { color: var(--mackenzie-green); }
+.book-it-total-par.over { color: #c0392b; }
+.book-it-total-par.even { color: #555; }
+.book-it-payout-inline { font-size: 0.9rem; font-weight: 800; padding-left: 6px; }
+.book-it-payout-inline.pos { color: var(--mackenzie-green); }
+.book-it-payout-inline.neg { color: #c0392b; }
+.book-it-col-header { color: #999; font-size: 0.68rem !important; text-transform: uppercase; font-weight: 600; padding-bottom: 2px; border-bottom: 1px solid var(--border-light); }
+.book-it-chevron { margin-left: auto; color: #aaa; display: flex; align-items: center; }
 

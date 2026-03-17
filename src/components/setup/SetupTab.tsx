@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, MapPin, Edit2, Plus, Trash2, UserCheck, ChevronDown, ChevronUp, RotateCcw, RefreshCw, Download } from 'lucide-react';
+import { User, MapPin, Edit2, Plus, Trash2, UserCheck, ChevronDown, ChevronUp, RotateCcw, RefreshCw, Download, Info, X, Search, UserMinus, UserPlus } from 'lucide-react';
 import type { AppState } from '../../hooks/useAppState';
 import { PlayerEntry } from './PlayerEntry';
 import { StrokeSummary } from './StrokeSummary';
@@ -32,6 +32,7 @@ export function SetupTab({ appState }: SetupTabProps) {
     pressStake, setPressStake,
     baseballStake, setBaseballStake,
     fourBallStakes, setFourBallStakes,
+    bookItStake, setBookItStake,
     visibleSections,
     strokeSummaryInputs,
     imStrokeInputs, setImStrokeInputs,
@@ -67,6 +68,7 @@ export function SetupTab({ appState }: SetupTabProps) {
   } = appState;
 
   const [ghinCourseModalOpen, setGhinCourseModalOpen] = useState(false);
+  const [infoModal, setInfoModal] = useState<'course' | 'players' | null>(null);
 
   // Track GHIN numbers for players looked up this session, so we can attach them when saving a partner
   const [pendingGhin, setPendingGhin] = useState<Record<string, string>>({});
@@ -97,7 +99,7 @@ export function SetupTab({ appState }: SetupTabProps) {
     <div className="setup-container">
       {/* Course Card */}
       <div className="card course-card">
-        <h3><MapPin size={14} /> ACTIVE COURSE</h3>
+        <h3><MapPin size={14} /> ACTIVE COURSE <button className="icon-btn info-btn" onClick={() => setInfoModal('course')} title="Course button info"><Info size={13} /></button></h3>
         <div className="course-selector-row">
           <select value={selectedCourseId} onChange={e => setSelectedCourseId(e.target.value)}>
             {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -121,7 +123,7 @@ export function SetupTab({ appState }: SetupTabProps) {
 
       {/* Players Card */}
       <div className="card">
-        <h3><User size={14} /> ROUND PLAYERS</h3>
+        <h3><User size={14} /> ROUND PLAYERS <button className="icon-btn info-btn" onClick={() => setInfoModal('players')} title="Player button info"><Info size={13} /></button></h3>
         <div className="player-entry-grid">
           {activePlayers.map((p, i) => (
             <PlayerEntry
@@ -211,17 +213,19 @@ export function SetupTab({ appState }: SetupTabProps) {
           pressStake={pressStake}
           baseballStake={baseballStake}
           fourBallStakes={fourBallStakes}
+          bookItStake={bookItStake}
           visibleStakes={visibleSections.stakes}
           onToggleStakes={() => toggleSection('stakes')}
           onSetMainStake={setMainStake}
           onSetPressStake={setPressStake}
           onSetBaseballStake={setBaseballStake}
           onSetFourBallStakes={setFourBallStakes}
+          onSetBookItStake={setBookItStake}
         />
       )}
 
       {/* Pairings Card */}
-      {gameMode !== 'baseball' && gameMode !== 'independent' && activePlayers.every(p => p.name) && (
+      {gameMode !== 'baseball' && gameMode !== 'independent' && gameMode !== 'book-it' && activePlayers.every(p => p.name) && (
         <PairingsCard
           gameMode={gameMode}
           activePlayers={activePlayers}
@@ -266,6 +270,31 @@ export function SetupTab({ appState }: SetupTabProps) {
           onClearToken={clearGhinToken}
           onClose={() => setGhinCourseModalOpen(false)}
         />
+      )}
+
+      {infoModal && (
+        <div className="modal-overlay" onClick={() => setInfoModal(null)}>
+          <div className="modal-content info-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{infoModal === 'course' ? 'Active Course Buttons' : 'Round Players Buttons'}</h3>
+              <button className="icon-btn" onClick={() => setInfoModal(null)}><X size={16} /></button>
+            </div>
+            {infoModal === 'course' ? (
+              <ul className="info-list">
+                <li><Edit2 size={13} /> <strong>Edit Course</strong> — Modify the tee boxes and details of the currently selected course.</li>
+                <li><Plus size={13} /> <strong>Add Course</strong> — Create a new custom course.</li>
+                <li><Download size={13} /> <strong>Import from GHIN</strong> — Search GHIN for a course and import its tee boxes automatically.</li>
+                <li><Trash2 size={13} /> <strong>Remove Course</strong> — Delete the currently selected custom course.</li>
+              </ul>
+            ) : (
+              <ul className="info-list">
+                <li><Search size={13} /> <strong>GHIN Lookup</strong> — Search GHIN by name to auto-fill a player's name and handicap index.</li>
+                <li><UserMinus size={13} /> <strong>Remove Player</strong> — Clear this player's name, index, and tee selection.</li>
+                <li><UserPlus size={13} /> <strong>Save as Partner</strong> — Save this player to your Partners list for quick loading in future rounds.</li>
+              </ul>
+            )}
+          </div>
+        </div>
       )}
 
       {ghinLookupPlayerId && (

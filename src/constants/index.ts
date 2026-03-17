@@ -112,6 +112,8 @@ export const STORAGE_KEYS = {
   MANUAL_PRESSES: 'robalter_manualPresses_v2',
   IND_MANUAL_PRESSES: 'robalter_indManualPresses',
   GHIN_TOKEN: 'robalter_ghin_token',
+  BOOK_IT_STAKE: 'robalter_bookItStake',
+  BOOK_IT_BOOKED_HOLES: 'robalter_bookItBookedHoles',
 } as const;
 
 // --- Defaults ---
@@ -133,6 +135,9 @@ export const DEFAULT_SETTINGS: GameSettings = {
   baseballBirdieRuleType: 'gross',
   useBaseballDoubleBackNine: false,
   useManualStrokes: false,
+  bookItHolesRequired: 11,
+  useBookItSegmented: false,
+  bookItSegmentRequired: 4,
 };
 
 export const DEFAULT_FOUR_BALL_STAKES: FourBallStakes = {

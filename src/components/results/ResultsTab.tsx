@@ -3,6 +3,7 @@ import { SixesResults } from './SixesResults';
 import { FourBallResults } from './FourBallResults';
 import { BaseballResults } from './BaseballResults';
 import { IndependentMatchResults } from './IndependentMatchResults';
+import { BookItResults } from './BookItResults';
 
 interface ResultsTabProps {
   appState: AppState;
@@ -32,6 +33,8 @@ export function ResultsTab({ appState }: ResultsTabProps) {
       {gameMode === 'four-ball' && <FourBallResults appState={appState} />}
 
       {(gameMode === 'sixes' || gameMode === 'wheel') && <SixesResults appState={appState} />}
+
+      {gameMode === 'book-it' && <BookItResults appState={appState} />}
 
       <IndependentMatchResults appState={appState} />
     </div>

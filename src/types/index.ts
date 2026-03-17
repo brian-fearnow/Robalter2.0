@@ -110,6 +110,9 @@ export interface GameSettings {
   baseballBirdieRuleType: 'gross' | 'net';
   useBaseballDoubleBackNine: boolean;
   useManualStrokes: boolean;
+  bookItHolesRequired: number;
+  useBookItSegmented: boolean;
+  bookItSegmentRequired: number;
 }
 
 // --- Audit / Result Interfaces ---
@@ -201,5 +204,11 @@ export interface SegmentFullResult {
   matches: Array<{ opponent: string[]; result: MatchResult }>;
 }
 
-export type GameMode = 'sixes' | 'wheel' | 'four-ball' | 'baseball' | 'independent';
+export type GameMode = 'sixes' | 'wheel' | 'four-ball' | 'baseball' | 'independent' | 'book-it';
+
+export interface BookItResult {
+  netScores: Record<string, number>;
+  netToPar: Record<string, number>;
+  payouts: Record<string, number>;
+}
 export type ActiveTab = 'setup' | 'scores' | 'results' | 'rules';

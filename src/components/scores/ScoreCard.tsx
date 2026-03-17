@@ -19,6 +19,8 @@ export function ScoreCard({ appState }: ScoreCardProps) {
     computeStrokesPerSixHoles,
     computeBaseballPoints,
     baselineCH,
+    bookedHoles,
+    toggleBookHole,
   } = appState;
 
   const renderStrokes = (strokes: number) => {
@@ -48,10 +50,18 @@ export function ScoreCard({ appState }: ScoreCardProps) {
           const displayStrokes = (gameMode === 'sixes' || gameMode === 'wheel')
             ? computeStrokesPerSixHoles(p)
             : (settings.useManualStrokes ? p.manualRelativeStrokes : p.courseHandicap - baselineCH);
+          const bookedCount = gameMode === 'book-it' ? (bookedHoles[p.id] || []).length : 0;
+          const holesRequired = settings.bookItHolesRequired;
           return (
             <div key={p.id} className="p-cell">
               <div className="p-name">{p.name.split(' ')[0]}</div>
-              <div className="p-strokes">{displayStrokes}</div>
+              {gameMode === 'book-it' ? (
+                <div className={`p-strokes booked-count ${bookedCount >= holesRequired ? 'booked-full' : ''}`}>
+                  {bookedCount}/{holesRequired}
+                </div>
+              ) : (
+                <div className="p-strokes">{displayStrokes}</div>
+              )}
             </div>
           );
         })}
@@ -60,8 +70,14 @@ export function ScoreCard({ appState }: ScoreCardProps) {
 
       {/* Scrollable rows */}
       <div className="scorecard-scroll-area">
-        {selectedCourse.holes.map(h => (
-          <div key={h.number} className="score-row">
+        {selectedCourse.holes.map(h => {
+          const isMidSegment = h.number >= 7 && h.number <= 12;
+          const showSegmentShading = isMidSegment && (
+            gameMode === 'sixes' || gameMode === 'wheel' ||
+            (gameMode === 'book-it' && settings.useBookItSegmented)
+          );
+          return (
+          <div key={h.number} className={`score-row${showSegmentShading ? ' mid-segment' : ''}`}>
             <div className="h-info">
               <strong>{h.number}</strong>
               <span>P{h.par}/H{h.handicap}</span>
@@ -69,6 +85,42 @@ export function ScoreCard({ appState }: ScoreCardProps) {
             {scorecardPlayers.map(p => {
               const strokes = computeStrokesForHole(p.id, h.number);
               const netVal = getNetScore(p.id, h.number);
+              if (gameMode === 'book-it') {
+                const isBooked = (bookedHoles[p.id] || []).includes(h.number);
+                const bookedCount = (bookedHoles[p.id] || []).length;
+                const holesRequired = settings.bookItHolesRequired;
+                const canBook = netVal !== null && (isBooked || bookedCount < holesRequired);
+                const segment = Math.floor((h.number - 1) / 6);
+                const segmentHoles = [segment * 6 + 1, segment * 6 + 2, segment * 6 + 3, segment * 6 + 4, segment * 6 + 5, segment * 6 + 6];
+                const segBooked = (bookedHoles[p.id] || []).filter(n => segmentHoles.includes(n)).length;
+                const canBookSegment = !settings.useBookItSegmented || isBooked || segBooked < settings.bookItSegmentRequired;
+                const bookable = canBook && canBookSegment;
+                return (
+                  <div key={p.id} className={`input-cell ${isBooked ? 'booked-hole' : ''}`}>
+                    <div className="input-wrapper">
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={scores[p.id]?.[h.number] || ''}
+                        onChange={e => setScore(p.id, h.number, e.target.value)}
+                        disabled={!p.name}
+                      />
+                      {renderStrokes(strokes)}
+                    </div>
+                    <div className="book-row">
+                      <span className="net">{netVal ?? ''}</span>
+                      <button
+                        className={`book-btn ${isBooked ? 'booked' : ''}`}
+                        onClick={() => bookable || isBooked ? toggleBookHole(p.id, h.number) : undefined}
+                        disabled={!bookable && !isBooked}
+                        title={isBooked ? 'Unbook hole' : 'Book this hole'}
+                      >
+                        {isBooked ? '★' : '☆'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
               return (
                 <div key={p.id} className="input-cell">
                   <div className="input-wrapper">
@@ -102,7 +154,8 @@ export function ScoreCard({ appState }: ScoreCardProps) {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
 
         {/* Front 9 total */}
         <div className="score-row total-row-sub">

@@ -27,10 +27,31 @@ export function RulesTab({ appState }: RulesTabProps) {
             gameMode === 'sixes' ? 'Sixes Rules' :
               gameMode === 'four-ball' ? 'Four Ball Rules' :
                 gameMode === 'baseball' ? 'Baseball Rules' :
-                  'Independent Match Rules'}
+                  gameMode === 'book-it' ? 'Book-It Rules' :
+                    'Independent Match Rules'}
         </h3>
         <div className="rules-content">
-          {gameMode === 'independent' ? (
+          {gameMode === 'book-it' ? (
+            <>
+              <section>
+                <h4>Book-It (Up to 5 Players)</h4>
+                <p>Each player uses their <strong>full course handicap</strong> (not relative) to calculate net scores hole by hole. After completing each hole, players choose whether to <strong>"book"</strong> that hole — locking it into their final score.</p>
+              </section>
+              <section>
+                <h4>Booking Rules</h4>
+                {settings.useBookItSegmented ? (
+                  <p>Players must book exactly <strong>{settings.bookItSegmentRequired} holes</strong> out of each 6-hole segment (holes 1–6, 7–12, 13–18), for a total of <strong>{settings.bookItSegmentRequired * 3} booked holes</strong>. Holes to Book is automatically set to {settings.bookItSegmentRequired * 3}.</p>
+                ) : (
+                  <p>Players must book exactly <strong>{settings.bookItHolesRequired} holes</strong> across the full 18-hole round. Any combination of holes is allowed.</p>
+                )}
+                <p style={{ marginTop: '8px' }}>The decision to book must be made before the next hole is played. Use the star (☆/★) button on the scorecard after entering a score.</p>
+              </section>
+              <section>
+                <h4>Payouts</h4>
+                <p>At the end of the round, players compare their aggregate net score (relative to par) over their booked holes. For each pair, the player with the better score wins the difference in strokes multiplied by the Point Value stake.</p>
+              </section>
+            </>
+          ) : gameMode === 'independent' ? (
             <section>
               <h4>Independent Matches Only</h4>
               <p>In this mode, there is no main team game. Players compete only in the independent matches you set up on the Setup tab.</p>
@@ -74,10 +95,12 @@ export function RulesTab({ appState }: RulesTabProps) {
             </section>
           )}
 
-          <section>
-            <h4>Baseline Strokes</h4>
-            <p>The best player in the group establishes the 0-stroke baseline. All other players receive strokes relative to this baseline.</p>
-          </section>
+          {gameMode !== 'book-it' && (
+            <section>
+              <h4>Baseline Strokes</h4>
+              <p>The best player in the group establishes the 0-stroke baseline. All other players receive strokes relative to this baseline.</p>
+            </section>
+          )}
 
           {gameMode === 'baseball' && (
             <section>
@@ -86,7 +109,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </section>
           )}
 
-          {gameMode !== 'four-ball' && gameMode !== 'baseball' && settings.strokeAllocation === 'divided' ? (
+          {gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && settings.strokeAllocation === 'divided' ? (
             <section>
               <h4>Sixes Allocation (Divided)</h4>
               <p>Total relative strokes are divided by 3 for each six-hole match.</p>
@@ -98,23 +121,25 @@ export function RulesTab({ appState }: RulesTabProps) {
                 )}
               </ul>
             </section>
-          ) : (gameMode !== 'four-ball' && gameMode !== 'baseball' && (
+          ) : (gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && (
             <section>
               <h4>Stroke Allocation (Handicap Ranking)</h4>
               <p>Strokes are applied across all 18 holes based on their handicap ranking (1-18).</p>
             </section>
           ))}
 
-          <section>
-            <h4>Betting & Tied Holes</h4>
-            <p>
-              {gameMode === 'baseball'
-                ? 'Payouts are calculated based on the difference in total points between each pair of players.'
-                : `A half stroke (1/2) wins a hole if the competitors are otherwise tied on that hole. Otherwise standard better ball scoring applies. ${settings.useSecondBallTieBreaker ? `If the match is still tied after the ${gameMode === 'four-ball' ? '9th or 18th' : 'final'} hole, the second lowest net score (2nd ball) is used as a tie-breaker.` : ''}`}
-            </p>
-          </section>
+          {gameMode !== 'book-it' && (
+            <section>
+              <h4>Betting & Tied Holes</h4>
+              <p>
+                {gameMode === 'baseball'
+                  ? 'Payouts are calculated based on the difference in total points between each pair of players.'
+                  : `A half stroke (1/2) wins a hole if the competitors are otherwise tied on that hole. Otherwise standard better ball scoring applies. ${settings.useSecondBallTieBreaker ? `If the match is still tied after the ${gameMode === 'four-ball' ? '9th or 18th' : 'final'} hole, the second lowest net score (2nd ball) is used as a tie-breaker.` : ''}`}
+              </p>
+            </section>
+          )}
 
-          {gameMode !== 'baseball' && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && (
             <section>
               <h4>Auto-Presses</h4>
               <p>
@@ -131,6 +156,67 @@ export function RulesTab({ appState }: RulesTabProps) {
       <div className="card settings-card">
         <h3><Sliders size={14} /> GAME SETTINGS</h3>
         <div className="settings-grid">
+          {gameMode === 'book-it' && (
+            <>
+              <div className="setting-control-row">
+                <div className="setting-info">
+                  <strong>Holes to Book</strong>
+                  <p>{settings.useBookItSegmented ? `Set by 6-Hole Booking (${settings.bookItSegmentRequired} × 3)` : 'Number of holes each player must book'}</p>
+                </div>
+                {settings.useBookItSegmented ? (
+                  <span className="setting-number-derived">{settings.bookItSegmentRequired * 3}</span>
+                ) : (
+                  <input
+                    type="number"
+                    className="setting-number-input"
+                    min={1}
+                    max={18}
+                    value={settings.bookItHolesRequired}
+                    onChange={e => {
+                      const v = parseInt(e.target.value);
+                      if (v >= 1 && v <= 18) setSettings(s => ({ ...s, bookItHolesRequired: v }));
+                    }}
+                  />
+                )}
+              </div>
+              <div className="setting-control-row">
+                <div className="setting-info">
+                  <strong>6-Hole Booking</strong>
+                  <p>Must book a set number of holes from each 6-hole segment</p>
+                </div>
+                <button
+                  className={`checkbox-btn ${settings.useBookItSegmented ? 'checked' : ''}`}
+                  onClick={() => setSettings(s => ({
+                    ...s,
+                    useBookItSegmented: !s.useBookItSegmented,
+                    ...(!s.useBookItSegmented && { bookItHolesRequired: s.bookItSegmentRequired * 3 }),
+                  }))}
+                >
+                  {settings.useBookItSegmented ? <Check size={16} /> : <X size={16} />}
+                </button>
+              </div>
+              {settings.useBookItSegmented && (
+                <div className="setting-control-row">
+                  <div className="setting-info">
+                    <strong>Holes Per Segment</strong>
+                    <p>Holes to book from each 6-hole segment</p>
+                  </div>
+                  <input
+                    type="number"
+                    className="setting-number-input"
+                    min={1}
+                    max={6}
+                    value={settings.bookItSegmentRequired}
+                    onChange={e => {
+                      const v = parseInt(e.target.value);
+                      if (v >= 1 && v <= 6) setSettings(s => ({ ...s, bookItSegmentRequired: v }));
+                    }}
+                  />
+                </div>
+              )}
+            </>
+          )}
+
           {gameMode === 'baseball' && (
             <>
               <div className="setting-control-row">
@@ -178,7 +264,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </>
           )}
 
-          {gameMode !== 'four-ball' && gameMode !== 'baseball' && (
+          {gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Stroke Allocation</strong>
@@ -197,7 +283,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {settings.strokeAllocation === 'divided' && gameMode !== 'four-ball' && gameMode !== 'baseball' && (
+          {settings.strokeAllocation === 'divided' && gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Half Strokes</strong>
@@ -212,7 +298,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {gameMode !== 'baseball' && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Second Ball Tie-Breaker</strong>
@@ -227,7 +313,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {gameMode !== 'baseball' && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Auto-Press</strong>
@@ -242,7 +328,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {gameMode !== 'baseball' && settings.useAutoPress && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && settings.useAutoPress && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Auto-Press Trigger</strong>

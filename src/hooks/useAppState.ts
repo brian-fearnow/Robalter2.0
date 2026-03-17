@@ -15,6 +15,7 @@ import type {
   FourBallResult,
   SegmentFullResult,
   BaseballTotals,
+  BookItResult,
 } from '../types';
 import {
   STORAGE_KEYS,
@@ -40,6 +41,7 @@ import {
   calculateSegmentFull,
   calculateIndependentMatchResult,
 } from '../utils/scoring';
+import { calculateBookItResults, getBookItNetForHole } from '../utils/bookIt';
 
 // Re-export calculation functions for component use
 export {
@@ -50,6 +52,8 @@ export {
   calculateFourBallFull,
   calculateSegmentFull,
   calculateIndependentMatchResult,
+  calculateBookItResults,
+  getBookItNetForHole,
 };
 
 function loadJson<T>(key: string, fallback: T): T {
@@ -165,6 +169,19 @@ export function useAppState() {
     ...loadJson(STORAGE_KEYS.FOUR_BALL_STAKES, {} as Partial<FourBallStakes>),
   }));
 
+  const [bookItStake, setBookItStake] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.BOOK_IT_STAKE);
+      return saved ? parseInt(saved) : 2;
+    } catch {
+      return 2;
+    }
+  });
+
+  const [bookedHoles, setBookedHoles] = useState<Record<string, number[]>>(() =>
+    loadJson(STORAGE_KEYS.BOOK_IT_BOOKED_HOLES, {} as Record<string, number[]>)
+  );
+
   const [segments, setSegments] = useState<MatchSegment[]>(() =>
     loadJson(STORAGE_KEYS.SEGMENTS, JSON.parse(JSON.stringify(DEFAULT_SEGMENTS)) as MatchSegment[])
   );
@@ -207,9 +224,11 @@ export function useAppState() {
       localStorage.setItem(STORAGE_KEYS.IND_MANUAL_PRESSES, JSON.stringify(indManualPresses));
       localStorage.setItem(STORAGE_KEYS.FOUR_BALL_STAKES, JSON.stringify(fourBallStakes));
       localStorage.setItem(STORAGE_KEYS.BASEBALL_STAKE, baseballStake.toString());
+      localStorage.setItem(STORAGE_KEYS.BOOK_IT_STAKE, bookItStake.toString());
+      localStorage.setItem(STORAGE_KEYS.BOOK_IT_BOOKED_HOLES, JSON.stringify(bookedHoles));
     }, 200);
     return () => clearTimeout(timer);
-  }, [players, scores, segments, partners, settings, courses, independentMatches, manualPresses, indManualPresses, fourBallStakes, baseballStake]);
+  }, [players, scores, segments, partners, settings, courses, independentMatches, manualPresses, indManualPresses, fourBallStakes, baseballStake, bookItStake, bookedHoles]);
 
   // --- Derived / Memoized Values ---
   const activePlayers = useMemo(() =>
@@ -219,7 +238,8 @@ export function useAppState() {
       (gameMode === 'four-ball' && players.indexOf(player) < 4) ||
       (gameMode === 'baseball' && players.indexOf(player) < 3) ||
       (gameMode === 'independent') ||
-      (gameMode === 'wheel')
+      (gameMode === 'wheel') ||
+      (gameMode === 'book-it')
     ),
     [players, gameMode]
   );
@@ -323,6 +343,7 @@ export function useAppState() {
       newMode === 'sixes' ? 'Sixes' :
       newMode === 'baseball' ? 'Baseball' :
       newMode === 'independent' ? 'Independent Matches Only' :
+      newMode === 'book-it' ? 'Book-It' :
       'The Wheel';
     const confirmed = window.confirm(
       `Switching to ${modeLabel} will reset all team pairings for this round. Scores and players will be kept. Continue?`
@@ -333,6 +354,9 @@ export function useAppState() {
         setPlayers(prev => prev.map((player, index) =>
           index >= 3 ? { ...player, name: '', index: 0, indexInput: '', courseHandicap: 0 } : player
         ));
+      }
+      if (newMode === 'book-it') {
+        setBookedHoles({});
       }
       setSegments([
         { segment: 1, team1: [], team2: [] },
@@ -628,10 +652,24 @@ export function useAppState() {
     );
   }, [segments]);
 
+  // --- Book-It Handlers ---
+  const toggleBookHole = useCallback((playerId: string, holeNumber: number) => {
+    setBookedHoles(prev => {
+      const playerBooked = prev[playerId] || [];
+      if (playerBooked.includes(holeNumber)) {
+        return { ...prev, [playerId]: playerBooked.filter(h => h !== holeNumber) };
+      }
+      return { ...prev, [playerId]: [...playerBooked, holeNumber].sort((a, b) => a - b) };
+    });
+  }, []);
+
   // --- Score Helpers ---
   const getNetScore = useCallback((pId: string, hNum: number): number | null => {
     const g = scores[pId]?.[hNum];
     if (!g) return null;
+    if (gameMode === 'book-it') {
+      return getBookItNetForHole(pId, hNum, activePlayers, selectedCourse.holes, scores);
+    }
     return g - getStrokesForHole(pId, hNum, activePlayers, selectedCourse.holes, settings, gameMode, baselineCH);
   }, [scores, activePlayers, selectedCourse.holes, settings, gameMode, baselineCH]);
 
@@ -655,7 +693,8 @@ export function useAppState() {
 
   // --- Calculation Wrappers (bound to current state) ---
   const computeStrokesForHole = useCallback((playerId: string, holeNumber: number) =>
-    getStrokesForHole(playerId, holeNumber, activePlayers, selectedCourse.holes, settings, gameMode, baselineCH),
+    getStrokesForHole(playerId, holeNumber, activePlayers, selectedCourse.holes, settings, gameMode,
+      gameMode === 'book-it' ? 0 : baselineCH),
     [activePlayers, selectedCourse.holes, settings, gameMode, baselineCH]
   );
 
@@ -689,6 +728,11 @@ export function useAppState() {
     [activePlayers, scores, selectedCourse.holes, settings, baselineCH, indManualPresses]
   );
 
+  const computeBookItResults = useCallback((): BookItResult =>
+    calculateBookItResults(activePlayers, scores, bookedHoles, selectedCourse.holes, bookItStake),
+    [activePlayers, scores, bookedHoles, selectedCourse.holes, bookItStake]
+  );
+
   const getPlayerTotals = useCallback((): Record<string, number> => {
     const totals: Record<string, number> = {};
     activePlayers.forEach(player => { totals[player.id] = 0; });
@@ -702,6 +746,11 @@ export function useAppState() {
       const results = computeBaseballTotals();
       players.slice(0, 3).forEach((player, idx) => {
         if (totals[player.id] !== undefined) totals[player.id] = results.payouts[idx];
+      });
+    } else if (gameMode === 'book-it') {
+      const results = computeBookItResults();
+      Object.keys(results.payouts).forEach(id => {
+        if (totals[id] !== undefined) totals[id] += results.payouts[id];
       });
     } else if (gameMode === 'wheel' || gameMode === 'sixes') {
       [0, 1, 2].forEach(segIdx => {
@@ -719,7 +768,7 @@ export function useAppState() {
     });
 
     return totals;
-  }, [gameMode, activePlayers, players, computeFourBallFull, computeBaseballTotals, computeSegmentFull, independentMatches, computeIndependentMatchResult]);
+  }, [gameMode, activePlayers, players, computeFourBallFull, computeBaseballTotals, computeBookItResults, computeSegmentFull, independentMatches, computeIndependentMatchResult]);
 
   const toggleMatchDetail = useCallback((id: string) => {
     setShowMatchDetails(prev => ({ ...prev, [id]: !prev[id] }));
@@ -732,6 +781,7 @@ export function useAppState() {
       setIndependentMatches([]);
       setManualPresses({ 0: { 0: [] }, 1: { 0: [] }, 2: { 0: [] } });
       setIndManualPresses({});
+      setBookedHoles({});
       setSegments([
         { segment: 1, team1: [], team2: [] },
         { segment: 2, team1: [], team2: [] },
@@ -761,6 +811,9 @@ export function useAppState() {
     pressStake, setPressStake,
     baseballStake, setBaseballStake,
     fourBallStakes, setFourBallStakes,
+    bookItStake, setBookItStake,
+    bookedHoles,
+    toggleBookHole,
     segments, setSegments,
     easterEgg,
     pressInputs, setPressInputs,
@@ -818,6 +871,7 @@ export function useAppState() {
     computeSegmentFull,
     computeFourBallFull,
     computeIndependentMatchResult,
+    computeBookItResults,
     getPlayerTotals,
   };
 }
