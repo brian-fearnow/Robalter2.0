@@ -8,6 +8,7 @@ interface StakesCardProps {
   baseballStake: number;
   fourBallStakes: FourBallStakes;
   bookItStake: number;
+  wolfStake: number;
   visibleStakes: boolean;
   onToggleStakes: () => void;
   onSetMainStake: (v: number) => void;
@@ -15,6 +16,7 @@ interface StakesCardProps {
   onSetBaseballStake: (v: number) => void;
   onSetFourBallStakes: (v: FourBallStakes) => void;
   onSetBookItStake: (v: number) => void;
+  onSetWolfStake: (v: number) => void;
 }
 
 export function StakesCard({
@@ -24,6 +26,7 @@ export function StakesCard({
   baseballStake,
   fourBallStakes,
   bookItStake,
+  wolfStake,
   visibleStakes,
   onToggleStakes,
   onSetMainStake,
@@ -31,6 +34,7 @@ export function StakesCard({
   onSetBaseballStake,
   onSetFourBallStakes,
   onSetBookItStake,
+  onSetWolfStake,
 }: StakesCardProps) {
   return (
     <div className="card">
@@ -90,6 +94,11 @@ export function StakesCard({
             <div className="stake-item">
               <span>Point Value ($)</span>
               <input type="number" value={bookItStake || ''} onChange={e => onSetBookItStake(e.target.value === '' ? 0 : parseInt(e.target.value))} />
+            </div>
+          ) : gameMode === 'wolf' ? (
+            <div className="stake-item">
+              <span>Point Value ($)</span>
+              <input type="number" value={wolfStake || ''} onChange={e => onSetWolfStake(e.target.value === '' ? 0 : parseInt(e.target.value))} />
             </div>
           ) : (
             <>

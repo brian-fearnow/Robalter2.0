@@ -21,6 +21,7 @@ export function AppHeader({ appState }: AppHeaderProps) {
           <option value="wheel">The Wheel</option>
           <option value="baseball">Baseball</option>
           <option value="book-it">Book-It</option>
+          <option value="wolf">Wolf</option>
           <option value="independent">Independent Matches Only</option>
         </select>
       </div>

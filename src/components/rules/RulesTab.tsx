@@ -1,5 +1,6 @@
 import { Sliders, Check, X } from 'lucide-react';
 import type { AppState } from '../../hooks/useAppState';
+import { getLastPlaceHoleCount } from '../../utils/wolf';
 
 interface RulesTabProps {
   appState: AppState;
@@ -14,7 +15,12 @@ export function RulesTab({ appState }: RulesTabProps) {
     isLakeSelected,
     getTeamNamesByIds,
     updateIndependentMatch,
+    activePlayers,
   } = appState;
+
+  const namedWolfCount = activePlayers.filter(p => p.name).length;
+  const lastPlaceHoleCount = namedWolfCount >= 3 ? getLastPlaceHoleCount(namedWolfCount) : 0;
+  const firstLastPlaceHole = 19 - lastPlaceHoleCount;
 
   return (
     <div className="rules-view">
@@ -28,7 +34,8 @@ export function RulesTab({ appState }: RulesTabProps) {
               gameMode === 'four-ball' ? 'Four Ball Rules' :
                 gameMode === 'baseball' ? 'Baseball Rules' :
                   gameMode === 'book-it' ? 'Book-It Rules' :
-                    'Independent Match Rules'}
+                    gameMode === 'wolf' ? 'Wolf Rules' :
+                      'Independent Match Rules'}
         </h3>
         <div className="rules-content">
           {gameMode === 'book-it' ? (
@@ -49,6 +56,35 @@ export function RulesTab({ appState }: RulesTabProps) {
               <section>
                 <h4>Payouts</h4>
                 <p>At the end of the round, players compare their aggregate net score (relative to par) over their booked holes. For each pair, the player with the better score wins the difference in strokes multiplied by the Point Value stake.</p>
+              </section>
+            </>
+          ) : gameMode === 'wolf' ? (
+            <>
+              <section>
+                <h4>Wolf (3–4 Players)</h4>
+                <p>One player is designated the <strong>Wolf</strong> on each hole. The Wolf tees off last and must decide after each player's tee shot whether to pick that player as a partner — before the next player hits. After all others have teed off, the Wolf must either take the last player as a partner or go it alone.</p>
+              </section>
+              <section>
+                <h4>Rotation</h4>
+                <p>The Wolf role rotates in the same order every hole. On hole 1, Player 1 is the Wolf; hole 2, Player 2; and so on, cycling through the group throughout the round.</p>
+              </section>
+              <section>
+                <h4>Decisions</h4>
+                <ul>
+                  <li><strong>Partner</strong> — Wolf picks one player. It's a 2v2 best-ball match for that hole.</li>
+                  <li><strong>Lone Wolf</strong> — Wolf plays alone against all other players. Higher risk, higher reward.</li>
+                  <li><strong>Blind Wolf</strong> — Wolf declares before anyone tees off that they are going alone. Doubles the lone wolf stakes.</li>
+                </ul>
+              </section>
+              <section>
+                <h4>Points & Payouts</h4>
+                <p>Best net score wins each hole (full course handicap applied, not relative).</p>
+                <ul>
+                  <li><strong>Partner win/loss:</strong> ±1 point each player</li>
+                  <li><strong>Lone Wolf win/loss:</strong> Wolf ±2 pts, each other player ∓1 pt</li>
+                  <li><strong>Blind Wolf win/loss:</strong> Wolf ±4 pts, each other player ∓2 pts</li>
+                </ul>
+                <p style={{ marginTop: '8px' }}>Ties result in no points changing hands. Final payout = total points × Point Value stake.</p>
               </section>
             </>
           ) : gameMode === 'independent' ? (
@@ -95,7 +131,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </section>
           )}
 
-          {gameMode !== 'book-it' && (
+          {gameMode !== 'book-it' && gameMode !== 'wolf' && (
             <section>
               <h4>Baseline Strokes</h4>
               <p>The best player in the group establishes the 0-stroke baseline. All other players receive strokes relative to this baseline.</p>
@@ -109,7 +145,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </section>
           )}
 
-          {gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && settings.strokeAllocation === 'divided' ? (
+          {gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && settings.strokeAllocation === 'divided' ? (
             <section>
               <h4>Sixes Allocation (Divided)</h4>
               <p>Total relative strokes are divided by 3 for each six-hole match.</p>
@@ -121,14 +157,14 @@ export function RulesTab({ appState }: RulesTabProps) {
                 )}
               </ul>
             </section>
-          ) : (gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && (
+          ) : (gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
             <section>
               <h4>Stroke Allocation (Handicap Ranking)</h4>
               <p>Strokes are applied across all 18 holes based on their handicap ranking (1-18).</p>
             </section>
           ))}
 
-          {gameMode !== 'book-it' && (
+          {gameMode !== 'book-it' && gameMode !== 'wolf' && (
             <section>
               <h4>Betting & Tied Holes</h4>
               <p>
@@ -139,7 +175,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </section>
           )}
 
-          {gameMode !== 'baseball' && gameMode !== 'book-it' && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
             <section>
               <h4>Auto-Presses</h4>
               <p>
@@ -217,6 +253,21 @@ export function RulesTab({ appState }: RulesTabProps) {
             </>
           )}
 
+          {gameMode === 'wolf' && (
+            <div className="setting-control-row">
+              <div className="setting-info">
+                <strong>Last Place Wolf</strong>
+                <p>Player in last place becomes wolf on hole{lastPlaceHoleCount > 1 ? 's' : ''} {firstLastPlaceHole}–18</p>
+              </div>
+              <button
+                className={`checkbox-btn ${settings.wolfLastPlaceWolf ? 'checked' : ''}`}
+                onClick={() => setSettings(s => ({ ...s, wolfLastPlaceWolf: !s.wolfLastPlaceWolf }))}
+              >
+                {settings.wolfLastPlaceWolf ? <Check size={16} /> : <X size={16} />}
+              </button>
+            </div>
+          )}
+
           {gameMode === 'baseball' && (
             <>
               <div className="setting-control-row">
@@ -264,7 +315,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </>
           )}
 
-          {gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && (
+          {gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Stroke Allocation</strong>
@@ -283,7 +334,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {settings.strokeAllocation === 'divided' && gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && (
+          {settings.strokeAllocation === 'divided' && gameMode !== 'four-ball' && gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Half Strokes</strong>
@@ -298,7 +349,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {gameMode !== 'baseball' && gameMode !== 'book-it' && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Second Ball Tie-Breaker</strong>
@@ -313,7 +364,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {gameMode !== 'baseball' && gameMode !== 'book-it' && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Auto-Press</strong>
@@ -328,7 +379,7 @@ export function RulesTab({ appState }: RulesTabProps) {
             </div>
           )}
 
-          {gameMode !== 'baseball' && gameMode !== 'book-it' && settings.useAutoPress && (
+          {gameMode !== 'baseball' && gameMode !== 'book-it' && gameMode !== 'wolf' && settings.useAutoPress && (
             <div className="setting-control-row">
               <div className="setting-info">
                 <strong>Auto-Press Trigger</strong>

@@ -20,6 +20,7 @@ const BOOK_IT_SETTINGS: GameSettings = {
   bookItHolesRequired: 11,
   useBookItSegmented: false,
   bookItSegmentRequired: 4,
+  wolfLastPlaceWolf: false,
 };
 
 /**

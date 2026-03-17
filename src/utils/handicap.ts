@@ -67,7 +67,7 @@ export const getStrokesForHole = (
     ? player.manualRelativeStrokes
     : player.courseHandicap - baselineCH;
 
-  if (gameMode === 'four-ball' || gameMode === 'baseball' || gameMode === 'book-it' || !isDividedAllocation) {
+  if (gameMode === 'four-ball' || gameMode === 'baseball' || gameMode === 'book-it' || gameMode === 'wolf' || !isDividedAllocation) {
     // Option A: Standard Handicap Ranking (strokes applied to hardest holes)
     const hole = courseHoles.find(h => h.number === holeNumber);
     if (!hole) return 0;

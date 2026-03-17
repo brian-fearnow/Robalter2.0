@@ -21,6 +21,9 @@ export function ScoreCard({ appState }: ScoreCardProps) {
     baselineCH,
     bookedHoles,
     toggleBookHole,
+    wolfDecisions,
+    setWolfDecision,
+    computeWolfResults,
   } = appState;
 
   const renderStrokes = (strokes: number) => {
@@ -40,6 +43,8 @@ export function ScoreCard({ appState }: ScoreCardProps) {
 
   const front9 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
   const back9 = [10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+  const wolfResults = gameMode === 'wolf' ? computeWolfResults() : null;
 
   return (
     <div className="scorecard-view" style={{ '--player-count': scorecardPlayers.length || 1 } as React.CSSProperties}>
@@ -76,27 +81,70 @@ export function ScoreCard({ appState }: ScoreCardProps) {
             gameMode === 'sixes' || gameMode === 'wheel' ||
             (gameMode === 'book-it' && settings.useBookItSegmented)
           );
-          return (
-          <div key={h.number} className={`score-row${showSegmentShading ? ' mid-segment' : ''}`}>
-            <div className="h-info">
-              <strong>{h.number}</strong>
-              <span>P{h.par}/H{h.handicap}</span>
-            </div>
-            {scorecardPlayers.map(p => {
-              const strokes = computeStrokesForHole(p.id, h.number);
-              const netVal = getNetScore(p.id, h.number);
-              if (gameMode === 'book-it') {
-                const isBooked = (bookedHoles[p.id] || []).includes(h.number);
-                const bookedCount = (bookedHoles[p.id] || []).length;
-                const holesRequired = settings.bookItHolesRequired;
-                const canBook = netVal !== null && (isBooked || bookedCount < holesRequired);
-                const segment = Math.floor((h.number - 1) / 6);
-                const segmentHoles = [segment * 6 + 1, segment * 6 + 2, segment * 6 + 3, segment * 6 + 4, segment * 6 + 5, segment * 6 + 6];
-                const segBooked = (bookedHoles[p.id] || []).filter(n => segmentHoles.includes(n)).length;
-                const canBookSegment = !settings.useBookItSegmented || isBooked || segBooked < settings.bookItSegmentRequired;
-                const bookable = canBook && canBookSegment;
+
+          // Wolf decision row (interlaced)
+          const showWolfRow = gameMode === 'wolf' && scorecardPlayers.length >= 2;
+          const wolfPlayerId = wolfResults?.holeResults.find(hr => hr.holeNumber === h.number)?.wolfPlayerId ?? null;
+          const wolfPlayer = wolfPlayerId ? scorecardPlayers.find(p => p.id === wolfPlayerId) ?? null : null;
+          const wolfPartners = showWolfRow && wolfPlayerId ? scorecardPlayers.filter(p => p.id !== wolfPlayerId) : [];
+          const wolfDecision = wolfDecisions[h.number];
+          const wolfSelectValue = !wolfDecision ? '' :
+            wolfDecision.blindWolf ? 'blind' :
+            wolfDecision.partnerId === null ? 'lone' :
+            wolfDecision.partnerId;
+          const wolfPairClass = !wolfDecision ? 'wolf-hole-pair' :
+            wolfDecision.blindWolf ? 'wolf-hole-pair is-blind-wolf' :
+            wolfDecision.partnerId === null ? 'wolf-hole-pair is-lone-wolf' :
+            'wolf-hole-pair is-partner';
+
+          // Score cells extracted to avoid duplication
+          const scoreCells = (
+            <>
+              <div className="h-info">
+                <strong>{h.number}</strong>
+                <span>P{h.par}/H{h.handicap}</span>
+              </div>
+              {scorecardPlayers.map(p => {
+                const strokes = computeStrokesForHole(p.id, h.number);
+                const netVal = getNetScore(p.id, h.number);
+                if (gameMode === 'book-it') {
+                  const isBooked = (bookedHoles[p.id] || []).includes(h.number);
+                  const bookedCount = (bookedHoles[p.id] || []).length;
+                  const holesRequired = settings.bookItHolesRequired;
+                  const canBook = netVal !== null && (isBooked || bookedCount < holesRequired);
+                  const segment = Math.floor((h.number - 1) / 6);
+                  const segmentHoles = [segment * 6 + 1, segment * 6 + 2, segment * 6 + 3, segment * 6 + 4, segment * 6 + 5, segment * 6 + 6];
+                  const segBooked = (bookedHoles[p.id] || []).filter(n => segmentHoles.includes(n)).length;
+                  const canBookSegment = !settings.useBookItSegmented || isBooked || segBooked < settings.bookItSegmentRequired;
+                  const bookable = canBook && canBookSegment;
+                  return (
+                    <div key={p.id} className={`input-cell ${isBooked ? 'booked-hole' : ''}`}>
+                      <div className="input-wrapper">
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={scores[p.id]?.[h.number] || ''}
+                          onChange={e => setScore(p.id, h.number, e.target.value)}
+                          disabled={!p.name}
+                        />
+                        {renderStrokes(strokes)}
+                      </div>
+                      <div className="book-row">
+                        <span className="net">{netVal ?? ''}</span>
+                        <button
+                          className={`book-btn ${isBooked ? 'booked' : ''}`}
+                          onClick={() => bookable || isBooked ? toggleBookHole(p.id, h.number) : undefined}
+                          disabled={!bookable && !isBooked}
+                          title={isBooked ? 'Unbook hole' : 'Book this hole'}
+                        >
+                          {isBooked ? '★' : '☆'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
                 return (
-                  <div key={p.id} className={`input-cell ${isBooked ? 'booked-hole' : ''}`}>
+                  <div key={p.id} className="input-cell">
                     <div className="input-wrapper">
                       <input
                         type="number"
@@ -107,53 +155,59 @@ export function ScoreCard({ appState }: ScoreCardProps) {
                       />
                       {renderStrokes(strokes)}
                     </div>
-                    <div className="book-row">
-                      <span className="net">{netVal ?? ''}</span>
-                      <button
-                        className={`book-btn ${isBooked ? 'booked' : ''}`}
-                        onClick={() => bookable || isBooked ? toggleBookHole(p.id, h.number) : undefined}
-                        disabled={!bookable && !isBooked}
-                        title={isBooked ? 'Unbook hole' : 'Book this hole'}
-                      >
-                        {isBooked ? '★' : '☆'}
-                      </button>
-                    </div>
+                    <span className="net">{netVal ?? ''}</span>
                   </div>
                 );
-              }
-              return (
-                <div key={p.id} className="input-cell">
-                  <div className="input-wrapper">
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      value={scores[p.id]?.[h.number] || ''}
-                      onChange={e => setScore(p.id, h.number, e.target.value)}
-                      disabled={!p.name}
-                    />
-                    {renderStrokes(strokes)}
-                  </div>
-                  <span className="net">{netVal ?? ''}</span>
+              })}
+              {gameMode === 'baseball' && (
+                <div className="bb-pts-cell">
+                  {(() => {
+                    let pts = computeBaseballPoints(h.number);
+                    if (pts.every(p => p === 0)) return null;
+                    if (h.number >= 10 && settings.useBaseballDoubleBackNine) {
+                      pts = pts.map(p => p * 2) as [number, number, number];
+                    }
+                    return (
+                      <div className="bb-pts-stack">
+                        {pts.map((p, i) => <span key={i}>{p}</span>)}
+                      </div>
+                    );
+                  })()}
                 </div>
-              );
-            })}
-            {gameMode === 'baseball' && (
-              <div className="bb-pts-cell">
-                {(() => {
-                  let pts = computeBaseballPoints(h.number);
-                  if (pts.every(p => p === 0)) return null;
-                  if (h.number >= 10 && settings.useBaseballDoubleBackNine) {
-                    pts = pts.map(p => p * 2) as [number, number, number];
-                  }
-                  return (
-                    <div className="bb-pts-stack">
-                      {pts.map((p, i) => <span key={i}>{p}</span>)}
-                    </div>
-                  );
-                })()}
+              )}
+            </>
+          );
+
+          if (showWolfRow) {
+            return (
+              <div key={h.number} className={wolfPairClass}>
+                <div className={`score-row${showSegmentShading ? ' mid-segment' : ''}`}>
+                  {scoreCells}
+                </div>
+                <div className="wolf-inline-row">
+                  <span className="wir-wolf-label">Wolf: {wolfPlayer?.name.split(' ')[0]}</span>
+                  <span className="wir-selection-label">Selection:</span>
+                  <select
+                    className="wir-select"
+                    value={wolfSelectValue}
+                    onChange={e => setWolfDecision(h.number, e.target.value)}
+                  >
+                    <option value="">— pick —</option>
+                    {wolfPartners.map(p => (
+                      <option key={p.id} value={p.id}>{p.name.split(' ')[0]}</option>
+                    ))}
+                    <option value="lone">Lone Wolf</option>
+                    <option value="blind">Blind Wolf</option>
+                  </select>
+                </div>
               </div>
-            )}
-          </div>
+            );
+          }
+
+          return (
+            <div key={h.number} className={`score-row${showSegmentShading ? ' mid-segment' : ''}`}>
+              {scoreCells}
+            </div>
           );
         })}
 
@@ -236,6 +290,8 @@ export function ScoreCard({ appState }: ScoreCardProps) {
           })}
           {gameMode === 'baseball' && <div className="bb-pts-cell"></div>}
         </div>
+
+
       </div>
     </div>
   );

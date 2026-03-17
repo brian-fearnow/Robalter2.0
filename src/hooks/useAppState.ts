@@ -16,6 +16,8 @@ import type {
   SegmentFullResult,
   BaseballTotals,
   BookItResult,
+  WolfResult,
+  WolfDecision,
 } from '../types';
 import {
   STORAGE_KEYS,
@@ -42,6 +44,7 @@ import {
   calculateIndependentMatchResult,
 } from '../utils/scoring';
 import { calculateBookItResults, getBookItNetForHole } from '../utils/bookIt';
+import { calculateWolfResults, getWolfPlayerIdForHole, getLastPlaceHoleCount } from '../utils/wolf';
 
 // Re-export calculation functions for component use
 export {
@@ -54,6 +57,9 @@ export {
   calculateIndependentMatchResult,
   calculateBookItResults,
   getBookItNetForHole,
+  calculateWolfResults,
+  getWolfPlayerIdForHole,
+  getLastPlaceHoleCount,
 };
 
 function loadJson<T>(key: string, fallback: T): T {
@@ -182,6 +188,17 @@ export function useAppState() {
     loadJson(STORAGE_KEYS.BOOK_IT_BOOKED_HOLES, {} as Record<string, number[]>)
   );
 
+  const [wolfStake, setWolfStake] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.WOLF_STAKE);
+      return saved ? parseInt(saved) : 5;
+    } catch { return 5; }
+  });
+
+  const [wolfDecisions, setWolfDecisions] = useState<Record<number, WolfDecision>>(() =>
+    loadJson(STORAGE_KEYS.WOLF_DECISIONS, {} as Record<number, WolfDecision>)
+  );
+
   const [segments, setSegments] = useState<MatchSegment[]>(() =>
     loadJson(STORAGE_KEYS.SEGMENTS, JSON.parse(JSON.stringify(DEFAULT_SEGMENTS)) as MatchSegment[])
   );
@@ -226,9 +243,11 @@ export function useAppState() {
       localStorage.setItem(STORAGE_KEYS.BASEBALL_STAKE, baseballStake.toString());
       localStorage.setItem(STORAGE_KEYS.BOOK_IT_STAKE, bookItStake.toString());
       localStorage.setItem(STORAGE_KEYS.BOOK_IT_BOOKED_HOLES, JSON.stringify(bookedHoles));
+      localStorage.setItem(STORAGE_KEYS.WOLF_STAKE, wolfStake.toString());
+      localStorage.setItem(STORAGE_KEYS.WOLF_DECISIONS, JSON.stringify(wolfDecisions));
     }, 200);
     return () => clearTimeout(timer);
-  }, [players, scores, segments, partners, settings, courses, independentMatches, manualPresses, indManualPresses, fourBallStakes, baseballStake, bookItStake, bookedHoles]);
+  }, [players, scores, segments, partners, settings, courses, independentMatches, manualPresses, indManualPresses, fourBallStakes, baseballStake, bookItStake, bookedHoles, wolfStake, wolfDecisions]);
 
   // --- Derived / Memoized Values ---
   const activePlayers = useMemo(() =>
@@ -237,6 +256,7 @@ export function useAppState() {
       (gameMode === 'sixes' && players.indexOf(player) < 4) ||
       (gameMode === 'four-ball' && players.indexOf(player) < 4) ||
       (gameMode === 'baseball' && players.indexOf(player) < 3) ||
+      (gameMode === 'wolf' && players.indexOf(player) < 4) ||
       (gameMode === 'independent') ||
       (gameMode === 'wheel') ||
       (gameMode === 'book-it')
@@ -344,6 +364,7 @@ export function useAppState() {
       newMode === 'baseball' ? 'Baseball' :
       newMode === 'independent' ? 'Independent Matches Only' :
       newMode === 'book-it' ? 'Book-It' :
+      newMode === 'wolf' ? 'Wolf' :
       'The Wheel';
     const confirmed = window.confirm(
       `Switching to ${modeLabel} will reset all team pairings for this round. Scores and players will be kept. Continue?`
@@ -357,6 +378,9 @@ export function useAppState() {
       }
       if (newMode === 'book-it') {
         setBookedHoles({});
+      }
+      if (newMode === 'wolf') {
+        setWolfDecisions({});
       }
       setSegments([
         { segment: 1, team1: [], team2: [] },
@@ -652,6 +676,22 @@ export function useAppState() {
     );
   }, [segments]);
 
+  // --- Wolf Handlers ---
+  const setWolfDecision = useCallback((hole: number, value: string) => {
+    setWolfDecisions(prev => {
+      if (!value) {
+        const next = { ...prev };
+        delete next[hole];
+        return next;
+      }
+      const decision: WolfDecision =
+        value === 'lone' ? { partnerId: null, blindWolf: false } :
+        value === 'blind' ? { partnerId: null, blindWolf: true } :
+        { partnerId: value, blindWolf: false };
+      return { ...prev, [hole]: decision };
+    });
+  }, []);
+
   // --- Book-It Handlers ---
   const toggleBookHole = useCallback((playerId: string, holeNumber: number) => {
     setBookedHoles(prev => {
@@ -670,7 +710,9 @@ export function useAppState() {
     if (gameMode === 'book-it') {
       return getBookItNetForHole(pId, hNum, activePlayers, selectedCourse.holes, scores);
     }
-    return g - getStrokesForHole(pId, hNum, activePlayers, selectedCourse.holes, settings, gameMode, baselineCH);
+    // Wolf uses full course handicap (baseline = 0)
+    const baseline = gameMode === 'wolf' ? 0 : baselineCH;
+    return g - getStrokesForHole(pId, hNum, activePlayers, selectedCourse.holes, settings, gameMode, baseline);
   }, [scores, activePlayers, selectedCourse.holes, settings, gameMode, baselineCH]);
 
   const getPlayerScoreTotal = useCallback((playerId: string) =>
@@ -694,7 +736,7 @@ export function useAppState() {
   // --- Calculation Wrappers (bound to current state) ---
   const computeStrokesForHole = useCallback((playerId: string, holeNumber: number) =>
     getStrokesForHole(playerId, holeNumber, activePlayers, selectedCourse.holes, settings, gameMode,
-      gameMode === 'book-it' ? 0 : baselineCH),
+      (gameMode === 'book-it' || gameMode === 'wolf') ? 0 : baselineCH),
     [activePlayers, selectedCourse.holes, settings, gameMode, baselineCH]
   );
 
@@ -733,6 +775,11 @@ export function useAppState() {
     [activePlayers, scores, bookedHoles, selectedCourse.holes, bookItStake]
   );
 
+  const computeWolfResults = useCallback((): WolfResult =>
+    calculateWolfResults(activePlayers, scores, wolfDecisions, selectedCourse.holes, wolfStake, settings.wolfLastPlaceWolf),
+    [activePlayers, scores, wolfDecisions, selectedCourse.holes, wolfStake, settings.wolfLastPlaceWolf]
+  );
+
   const getPlayerTotals = useCallback((): Record<string, number> => {
     const totals: Record<string, number> = {};
     activePlayers.forEach(player => { totals[player.id] = 0; });
@@ -752,6 +799,11 @@ export function useAppState() {
       Object.keys(results.payouts).forEach(id => {
         if (totals[id] !== undefined) totals[id] += results.payouts[id];
       });
+    } else if (gameMode === 'wolf') {
+      const results = computeWolfResults();
+      Object.keys(results.payouts).forEach(id => {
+        if (totals[id] !== undefined) totals[id] += results.payouts[id];
+      });
     } else if (gameMode === 'wheel' || gameMode === 'sixes') {
       [0, 1, 2].forEach(segIdx => {
         const results = computeSegmentFull(segIdx);
@@ -768,7 +820,7 @@ export function useAppState() {
     });
 
     return totals;
-  }, [gameMode, activePlayers, players, computeFourBallFull, computeBaseballTotals, computeBookItResults, computeSegmentFull, independentMatches, computeIndependentMatchResult]);
+  }, [gameMode, activePlayers, players, computeFourBallFull, computeBaseballTotals, computeBookItResults, computeWolfResults, computeSegmentFull, independentMatches, computeIndependentMatchResult]);
 
   const toggleMatchDetail = useCallback((id: string) => {
     setShowMatchDetails(prev => ({ ...prev, [id]: !prev[id] }));
@@ -782,6 +834,7 @@ export function useAppState() {
       setManualPresses({ 0: { 0: [] }, 1: { 0: [] }, 2: { 0: [] } });
       setIndManualPresses({});
       setBookedHoles({});
+      setWolfDecisions({});
       setSegments([
         { segment: 1, team1: [], team2: [] },
         { segment: 2, team1: [], team2: [] },
@@ -814,6 +867,9 @@ export function useAppState() {
     bookItStake, setBookItStake,
     bookedHoles,
     toggleBookHole,
+    wolfStake, setWolfStake,
+    wolfDecisions,
+    setWolfDecision,
     segments, setSegments,
     easterEgg,
     pressInputs, setPressInputs,
@@ -872,6 +928,7 @@ export function useAppState() {
     computeFourBallFull,
     computeIndependentMatchResult,
     computeBookItResults,
+    computeWolfResults,
     getPlayerTotals,
   };
 }

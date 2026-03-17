@@ -114,6 +114,8 @@ export const STORAGE_KEYS = {
   GHIN_TOKEN: 'robalter_ghin_token',
   BOOK_IT_STAKE: 'robalter_bookItStake',
   BOOK_IT_BOOKED_HOLES: 'robalter_bookItBookedHoles',
+  WOLF_STAKE: 'robalter_wolfStake',
+  WOLF_DECISIONS: 'robalter_wolfDecisions',
 } as const;
 
 // --- Defaults ---
@@ -138,6 +140,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
   bookItHolesRequired: 11,
   useBookItSegmented: false,
   bookItSegmentRequired: 4,
+  wolfLastPlaceWolf: false,
 };
 
 export const DEFAULT_FOUR_BALL_STAKES: FourBallStakes = {

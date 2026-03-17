@@ -113,6 +113,7 @@ export interface GameSettings {
   bookItHolesRequired: number;
   useBookItSegmented: boolean;
   bookItSegmentRequired: number;
+  wolfLastPlaceWolf: boolean;
 }
 
 // --- Audit / Result Interfaces ---
@@ -204,7 +205,26 @@ export interface SegmentFullResult {
   matches: Array<{ opponent: string[]; result: MatchResult }>;
 }
 
-export type GameMode = 'sixes' | 'wheel' | 'four-ball' | 'baseball' | 'independent' | 'book-it';
+export type GameMode = 'sixes' | 'wheel' | 'four-ball' | 'baseball' | 'independent' | 'book-it' | 'wolf';
+
+export interface WolfDecision {
+  partnerId: string | null; // null = lone wolf
+  blindWolf: boolean;
+}
+
+export interface WolfHoleResult {
+  holeNumber: number;
+  wolfPlayerId: string;
+  decision: WolfDecision | null;
+  wolfTeamWon: boolean | null; // null = tie or no scores
+  pointDeltas: Record<string, number>;
+}
+
+export interface WolfResult {
+  holeResults: WolfHoleResult[];
+  totalPoints: Record<string, number>;
+  payouts: Record<string, number>;
+}
 
 export interface BookItResult {
   netScores: Record<string, number>;

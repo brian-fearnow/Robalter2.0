@@ -847,3 +847,32 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .book-it-col-header { color: #999; font-size: 0.68rem !important; text-transform: uppercase; font-weight: 600; padding-bottom: 2px; border-bottom: 1px solid var(--border-light); }
 .book-it-chevron { color: #aaa; display: flex; align-items: center; }
 
+/* --- Wolf Scorecard Interlaced Rows --- */
+.wolf-hole-pair { border: 1.5px solid rgba(0, 75, 40, 0.2); border-radius: 4px; margin-bottom: 3px; overflow: hidden; }
+.wolf-hole-pair.is-partner { border-color: rgba(0, 75, 40, 0.3); }
+.wolf-hole-pair.is-lone-wolf { border-color: rgba(197, 160, 89, 0.6); }
+.wolf-hole-pair.is-blind-wolf { border-color: var(--heritage-gold); border-width: 2px; }
+.wolf-inline-row { display: flex; align-items: center; gap: 8px; padding: 3px 8px; background: rgba(0, 0, 0, 0.03); border-top: 1px solid rgba(0, 0, 0, 0.07); font-family: sans-serif; }
+.wir-wolf-label { font-size: 0.65rem; color: var(--mackenzie-green); white-space: nowrap; min-width: 80px; }
+.wir-selection-label { font-size: 0.65rem; color: #666; white-space: nowrap; }
+.wir-select { font-size: 0.68rem; padding: 2px 4px; border: 1px solid var(--border-light); border-radius: 4px; background: #fff; color: #333; width: auto; max-width: 120px; }
+.wir-select:focus { outline: none; border-color: var(--mackenzie-green); }
+
+/* --- Wolf Results --- */
+.wolf-results-grid { margin-bottom: 12px; }
+.wolf-res-header { display: grid; grid-template-columns: 1fr 60px 70px; gap: 6px; font-size: 0.65rem; color: #999; text-transform: uppercase; font-weight: 600; font-family: sans-serif; padding-bottom: 4px; border-bottom: 1px solid var(--border-light); margin-bottom: 4px; }
+.wolf-res-row { display: grid; grid-template-columns: 1fr 60px 70px; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-family: sans-serif; }
+.wolf-pts { font-size: 0.85rem; font-weight: 700; font-family: sans-serif; }
+.wolf-pts.pos { color: var(--mackenzie-green); }
+.wolf-pts.neg { color: #c0392b; }
+.wolf-holes-toggle { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 8px 0; border-top: 1px solid var(--border-light); color: var(--mackenzie-green); font-size: 0.75rem; font-weight: 600; font-family: sans-serif; margin-top: 4px; }
+.wolf-hole-breakdown { margin-top: 4px; }
+.wolf-hole-row { display: grid; gap: 4px; align-items: center; padding: 4px 6px; border-bottom: 1px solid #f0f0f0; font-size: 0.72rem; font-family: sans-serif; border-radius: 2px; }
+.wolf-hole-row.lone-wolf-row { background: rgba(197, 160, 89, 0.15); }
+.wolf-hole-row.blind-wolf-row { background: rgba(197, 160, 89, 0.32); }
+.wolf-hole-header { font-size: 0.62rem !important; color: #999; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid var(--border-light) !important; padding-bottom: 4px; margin-bottom: 2px; background: none !important; }
+.wolf-hole-num { font-weight: 700; color: var(--mackenzie-green); }
+.wolf-blind-label { color: var(--heritage-gold); font-weight: 700; }
+.wolf-pts-zero { color: #ccc; }
+.wolf-cell-wolf { font-weight: 800; border: 1.5px solid currentColor; border-radius: 3px; padding: 0 3px; }
+

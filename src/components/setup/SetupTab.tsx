@@ -33,6 +33,7 @@ export function SetupTab({ appState }: SetupTabProps) {
     baseballStake, setBaseballStake,
     fourBallStakes, setFourBallStakes,
     bookItStake, setBookItStake,
+    wolfStake, setWolfStake,
     visibleSections,
     strokeSummaryInputs,
     imStrokeInputs, setImStrokeInputs,
@@ -214,6 +215,7 @@ export function SetupTab({ appState }: SetupTabProps) {
           baseballStake={baseballStake}
           fourBallStakes={fourBallStakes}
           bookItStake={bookItStake}
+          wolfStake={wolfStake}
           visibleStakes={visibleSections.stakes}
           onToggleStakes={() => toggleSection('stakes')}
           onSetMainStake={setMainStake}
@@ -221,11 +223,12 @@ export function SetupTab({ appState }: SetupTabProps) {
           onSetBaseballStake={setBaseballStake}
           onSetFourBallStakes={setFourBallStakes}
           onSetBookItStake={setBookItStake}
+          onSetWolfStake={setWolfStake}
         />
       )}
 
       {/* Pairings Card */}
-      {gameMode !== 'baseball' && gameMode !== 'independent' && gameMode !== 'book-it' && activePlayers.every(p => p.name) && (
+      {gameMode !== 'baseball' && gameMode !== 'independent' && gameMode !== 'book-it' && gameMode !== 'wolf' && activePlayers.every(p => p.name) && (
         <PairingsCard
           gameMode={gameMode}
           activePlayers={activePlayers}
