@@ -812,16 +812,22 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
   border: 1px solid var(--border-light); border-radius: 8px; padding: 10px; margin-bottom: 10px;
 }
 .book-it-player-header {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: nowrap;
 }
-.book-it-player-header strong { font-size: 0.95rem; }
-.book-it-count { font-size: 0.75rem; color: #666; background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 10px; }
+.bi-player-left {
+  display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden;
+}
+.bi-player-left strong { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bi-player-right {
+  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+}
+.book-it-count { font-size: 0.75rem; color: #666; background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 10px; white-space: nowrap; }
 .book-it-count.booked-full { background: rgba(0, 75, 40, 0.12); color: var(--mackenzie-green); font-weight: 700; }
-.book-it-remaining { font-size: 0.7rem; color: #e07b00; font-style: italic; }
+.book-it-remaining { font-size: 0.7rem; color: #e07b00; font-style: italic; white-space: nowrap; }
 .book-it-holes-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
 .book-it-hole-row {
-  display: grid; grid-template-columns: 30px 30px 30px 40px;
-  font-size: 0.78rem; padding: 2px 4px; border-radius: 4px; align-items: center; gap: 4px;
+  display: grid; grid-template-columns: 34px 1fr 1fr 44px;
+  font-size: 0.78rem; padding: 2px 4px; border-radius: 4px; align-items: center; gap: 6px;
 }
 .book-it-hole-row.total-row { border-top: 1px solid var(--border-light); margin-top: 2px; padding-top: 4px; }
 .bi-hole-num { color: #888; font-weight: 600; }
@@ -831,13 +837,13 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .bi-to-par.under { color: var(--mackenzie-green); }
 .bi-to-par.over { color: #c0392b; }
 .bi-to-par.even { color: #555; }
-.book-it-total-par { margin-left: auto; font-size: 0.82rem; font-weight: 700; }
+.book-it-total-par { font-size: 0.82rem; font-weight: 700; }
 .book-it-total-par.under { color: var(--mackenzie-green); }
 .book-it-total-par.over { color: #c0392b; }
 .book-it-total-par.even { color: #555; }
-.book-it-payout-inline { font-size: 0.9rem; font-weight: 800; padding-left: 6px; }
+.book-it-payout-inline { font-size: 0.9rem; font-weight: 800; }
 .book-it-payout-inline.pos { color: var(--mackenzie-green); }
 .book-it-payout-inline.neg { color: #c0392b; }
 .book-it-col-header { color: #999; font-size: 0.68rem !important; text-transform: uppercase; font-weight: 600; padding-bottom: 2px; border-bottom: 1px solid var(--border-light); }
-.book-it-chevron { margin-left: auto; color: #aaa; display: flex; align-items: center; }
+.book-it-chevron { color: #aaa; display: flex; align-items: center; }
 

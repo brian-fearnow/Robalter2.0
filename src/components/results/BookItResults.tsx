@@ -48,24 +48,28 @@ export function BookItResults({ appState }: BookItResultsProps) {
               onClick={() => booked.length > 0 && togglePlayer(player.id)}
               style={{ cursor: booked.length > 0 ? 'pointer' : 'default' }}
             >
-              <strong>{player.name}</strong>
-              <span className={`book-it-count ${booked.length >= holesRequired ? 'booked-full' : ''}`}>
-                {booked.length}/{holesRequired} booked
-              </span>
-              {remaining > 0 && (
-                <span className="book-it-remaining">{remaining} left</span>
-              )}
-              <span className={`book-it-total-par ${netToPar < 0 ? 'under' : netToPar > 0 ? 'over' : 'even'}`}>
-                {netToPar === 0 ? 'E' : netToPar > 0 ? `+${netToPar}` : `${netToPar}`}
-              </span>
-              <span className={`book-it-payout-inline ${payout >= 0 ? 'pos' : 'neg'}`}>
-                {payout >= 0 ? `+$${payout}` : `-$${Math.abs(payout)}`}
-              </span>
-              {booked.length > 0 && (
-                <span className="book-it-chevron">
-                  {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              <div className="bi-player-left">
+                <strong>{player.name}</strong>
+                <span className={`book-it-count ${booked.length >= holesRequired ? 'booked-full' : ''}`}>
+                  {booked.length}/{holesRequired} booked
                 </span>
-              )}
+                {remaining > 0 && (
+                  <span className="book-it-remaining">{remaining} left</span>
+                )}
+              </div>
+              <div className="bi-player-right">
+                <span className={`book-it-total-par ${netToPar < 0 ? 'under' : netToPar > 0 ? 'over' : 'even'}`}>
+                  {netToPar === 0 ? 'E' : netToPar > 0 ? `+${netToPar}` : `${netToPar}`}
+                </span>
+                <span className={`book-it-payout-inline ${payout >= 0 ? 'pos' : 'neg'}`}>
+                  {payout >= 0 ? `+$${payout}` : `-$${Math.abs(payout)}`}
+                </span>
+                {booked.length > 0 && (
+                  <span className="book-it-chevron">
+                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </span>
+                )}
+              </div>
             </div>
 
             {isExpanded && booked.length > 0 && (
