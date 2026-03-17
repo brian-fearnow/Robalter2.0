@@ -1,10 +1,28 @@
+import { useState } from 'react';
 import type { AppState } from '../../hooks/useAppState';
+import type { SkinsRoundState } from '../../hooks/useSkinsRound';
+import { getSkinsStrokesForHole } from '../../utils/skins';
 
 interface ScoreCardProps {
   appState: AppState;
+  skinsState: SkinsRoundState;
 }
 
-export function ScoreCard({ appState }: ScoreCardProps) {
+const GAME_MODE_LABELS: Record<string, string> = {
+  'sixes': 'Sixes',
+  'wheel': 'Wheel',
+  'four-ball': 'Four Ball',
+  'baseball': 'Baseball',
+  'independent': 'Independent',
+  'book-it': 'Book-It',
+  'wolf': 'Wolf',
+};
+
+type StrokeView = 'main' | 'skins';
+
+export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
+  const [strokeView, setStrokeView] = useState<StrokeView>('main');
+
   const {
     selectedCourse,
     scorecardPlayers,
@@ -52,9 +70,11 @@ export function ScoreCard({ appState }: ScoreCardProps) {
       <div className="scorecard-header-fixed">
         <div className="h-cell">Hole</div>
         {scorecardPlayers.map(p => {
-          const displayStrokes = (gameMode === 'sixes' || gameMode === 'wheel')
-            ? computeStrokesPerSixHoles(p)
-            : (settings.useManualStrokes ? p.manualRelativeStrokes : p.courseHandicap - baselineCH);
+          const displayStrokes = (strokeView === 'skins' && skinsState.roundId)
+            ? p.courseHandicap
+            : (gameMode === 'sixes' || gameMode === 'wheel')
+              ? computeStrokesPerSixHoles(p)
+              : (settings.useManualStrokes ? p.manualRelativeStrokes : p.courseHandicap - baselineCH);
           const bookedCount = gameMode === 'book-it' ? (bookedHoles[p.id] || []).length : 0;
           const holesRequired = settings.bookItHolesRequired;
           return (
@@ -72,6 +92,25 @@ export function ScoreCard({ appState }: ScoreCardProps) {
         })}
         {gameMode === 'baseball' && <div className="p-cell bb-pts-header">Pts</div>}
       </div>
+
+      {/* Stroke-view selector — shown when a skins game is active */}
+      {skinsState.roundId && (
+        <div className="stroke-view-selector">
+          <span className="stroke-view-label">Strokes for:</span>
+          <button
+            className={`stroke-view-btn${strokeView === 'main' ? ' active' : ''}`}
+            onClick={() => setStrokeView('main')}
+          >
+            {GAME_MODE_LABELS[gameMode] ?? gameMode}
+          </button>
+          <button
+            className={`stroke-view-btn${strokeView === 'skins' ? ' active' : ''}`}
+            onClick={() => setStrokeView('skins')}
+          >
+            Skins{skinsState.useHalfStrokes ? ' (½)' : ''}
+          </button>
+        </div>
+      )}
 
       {/* Scrollable rows */}
       <div className="scorecard-scroll-area">
@@ -105,7 +144,9 @@ export function ScoreCard({ appState }: ScoreCardProps) {
                 <span>P{h.par}/H{h.handicap}</span>
               </div>
               {scorecardPlayers.map(p => {
-                const strokes = computeStrokesForHole(p.id, h.number);
+                const strokes = (strokeView === 'skins' && skinsState.roundId)
+                  ? getSkinsStrokesForHole(p.id, h.number, scorecardPlayers, selectedCourse.holes, skinsState.useHalfStrokes)
+                  : computeStrokesForHole(p.id, h.number);
                 const netVal = getNetScore(p.id, h.number);
                 if (gameMode === 'book-it') {
                   const isBooked = (bookedHoles[p.id] || []).includes(h.number);

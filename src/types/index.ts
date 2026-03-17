@@ -205,7 +205,7 @@ export interface SegmentFullResult {
   matches: Array<{ opponent: string[]; result: MatchResult }>;
 }
 
-export type GameMode = 'sixes' | 'wheel' | 'four-ball' | 'baseball' | 'independent' | 'book-it' | 'wolf';
+export type GameMode = 'sixes' | 'wheel' | 'four-ball' | 'baseball' | 'independent' | 'book-it' | 'wolf' | 'skins';
 
 export interface WolfDecision {
   partnerId: string | null; // null = lone wolf

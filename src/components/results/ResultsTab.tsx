@@ -1,18 +1,34 @@
 import type { AppState } from '../../hooks/useAppState';
+import type { SkinsRoundState } from '../../hooks/useSkinsRound';
 import { SixesResults } from './SixesResults';
 import { FourBallResults } from './FourBallResults';
 import { BaseballResults } from './BaseballResults';
 import { IndependentMatchResults } from './IndependentMatchResults';
 import { BookItResults } from './BookItResults';
 import { WolfResults } from './WolfResults';
+import { SkinsResultsCard } from './SkinsResultsCard';
 
 interface ResultsTabProps {
   appState: AppState;
+  skinsState: SkinsRoundState;
 }
 
-export function ResultsTab({ appState }: ResultsTabProps) {
+export function ResultsTab({ appState, skinsState }: ResultsTabProps) {
   const { activePlayers, players, gameMode, getPlayerTotals } = appState;
-  const totals = getPlayerTotals();
+  const baseTotals = getPlayerTotals();
+
+  // Merge skins net winnings (payout − buy-in) into totals
+  const totals = { ...baseTotals };
+  if (skinsState.roundId && skinsState.skinsResults) {
+    const { buyIn, foursomeId } = skinsState;
+    skinsState.skinsResults.players.forEach(p => {
+      // Only apply skins results for this group's players (foursomeId match prevents
+      // cross-group player ID collisions when multiple groups share the same local IDs).
+      if (p.foursomeId === foursomeId && totals[p.playerId] !== undefined) {
+        totals[p.playerId] += Math.round(p.totalPayout - buyIn);
+      }
+    });
+  }
 
   return (
     <div className="results-view">
@@ -40,6 +56,8 @@ export function ResultsTab({ appState }: ResultsTabProps) {
       {gameMode === 'wolf' && <WolfResults appState={appState} />}
 
       <IndependentMatchResults appState={appState} />
+
+      <SkinsResultsCard skinsState={skinsState} />
     </div>
   );
 }

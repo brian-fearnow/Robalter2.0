@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { User, MapPin, Edit2, Plus, Trash2, UserCheck, ChevronDown, ChevronUp, RotateCcw, RefreshCw, Download, Info, X, Search, UserMinus, UserPlus } from 'lucide-react';
 import type { AppState } from '../../hooks/useAppState';
+import type { SkinsRoundState } from '../../hooks/useSkinsRound';
 import { PlayerEntry } from './PlayerEntry';
 import { StrokeSummary } from './StrokeSummary';
 import { StakesCard } from './StakesCard';
 import { PairingsCard } from './PairingsCard';
 import { IndependentMatchesCard } from './IndependentMatchesCard';
+import { SkinsCard } from './SkinsCard';
 import { GhinLookupModal } from './GhinLookupModal';
 import { GhinCourseLookupModal } from './GhinCourseLookupModal';
 import { PERMANENT_COURSE_IDS } from '../../constants';
@@ -13,9 +15,10 @@ import type { GhinGolfer } from '../../types';
 
 interface SetupTabProps {
   appState: AppState;
+  skinsState: SkinsRoundState;
 }
 
-export function SetupTab({ appState }: SetupTabProps) {
+export function SetupTab({ appState, skinsState }: SetupTabProps) {
   const {
     courses,
     selectedCourseId, setSelectedCourseId,
@@ -166,7 +169,13 @@ export function SetupTab({ appState }: SetupTabProps) {
                 </div>
               )}
               <div className="partners-grid">
-                {partners.map(pt => (
+                {[...partners].sort((a, b) => {
+                  const sortKey = (name: string) => {
+                    const parts = name.trim().split(/\s+/);
+                    return parts.length > 1 ? parts[parts.length - 1] : parts[0];
+                  };
+                  return sortKey(a.name).localeCompare(sortKey(b.name));
+                }).map(pt => (
                   <div key={pt.name} className="partner-item-row">
                     <span className="pt-name">
                       {pt.name}
@@ -257,6 +266,9 @@ export function SetupTab({ appState }: SetupTabProps) {
         onSetPressInputs={setPressInputs}
         setIndependentMatches={setIndependentMatches}
       />
+
+      {/* Skins */}
+      <SkinsCard skinsState={skinsState} activePlayers={activePlayers} />
 
       {/* Reset */}
       <div className="card reset-card">

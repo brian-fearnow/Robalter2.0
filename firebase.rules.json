@@ -1,0 +1,32 @@
+{
+  "rules": {
+    "rounds": {
+      "$roundId": {
+        ".read": true,
+        ".write": true,
+        "metadata": {
+          ".validate": "newData.hasChildren(['code', 'courseId', 'courseName', 'skinsStake', 'createdAt', 'status'])",
+          "code":       { ".validate": "newData.isString() && newData.val().length === 6" },
+          "skinsStake": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "status": {
+            ".validate": "newData.val() === 'waiting' || newData.val() === 'active' || newData.val() === 'completed'"
+          }
+        },
+        "foursomes": {
+          "$foursomeId": {
+            ".read": true,
+            ".write": true,
+            "lastUpdated": { ".validate": "newData.isNumber()" }
+          }
+        }
+      }
+    },
+    "codes": {
+      "$code": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.isString()"
+      }
+    }
+  }
+}

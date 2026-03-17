@@ -1,6 +1,7 @@
-import { Component, type ReactNode } from 'react';
+import { Component, useEffect, type ReactNode } from 'react';
 import './App.css';
 import { useAppState } from './hooks/useAppState';
+import { useSkinsRound } from './hooks/useSkinsRound';
 import { AppHeader } from './components/AppHeader';
 import { BottomNav } from './components/BottomNav';
 import { CourseModal } from './components/CourseModal';
@@ -49,7 +50,19 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 // --- Main App ---
 function AppInner() {
   const appState = useAppState();
-  const { activeTab, isLakeSelected, easterEgg } = appState;
+  const { activeTab, isLakeSelected, easterEgg, selectedCourse, activePlayers, scores } = appState;
+
+  const skinsState = useSkinsRound(selectedCourse);
+
+  // Sync main app scores to Firebase whenever they change
+  useEffect(() => {
+    if (skinsState.roundId) skinsState.syncScores(scores);
+  }, [scores, skinsState.roundId, skinsState.syncScores]);
+
+  // Keep Firebase player list in sync when active players change
+  useEffect(() => {
+    if (skinsState.roundId) skinsState.updateMyPlayers(activePlayers);
+  }, [activePlayers, skinsState.roundId, skinsState.updateMyPlayers]);
 
   return (
     <div className={`app-container ${isLakeSelected ? 'lake-theme' : ''}`}>
@@ -60,9 +73,9 @@ function AppInner() {
       <AppHeader appState={appState} />
 
       <main className="app-content">
-        {activeTab === 'setup' && <SetupTab appState={appState} />}
-        {activeTab === 'scores' && <ScoreCard appState={appState} />}
-        {activeTab === 'results' && <ResultsTab appState={appState} />}
+        {activeTab === 'setup' && <SetupTab appState={appState} skinsState={skinsState} />}
+        {activeTab === 'scores' && <ScoreCard appState={appState} skinsState={skinsState} />}
+        {activeTab === 'results' && <ResultsTab appState={appState} skinsState={skinsState} />}
         {activeTab === 'rules' && <RulesTab appState={appState} />}
       </main>
 
