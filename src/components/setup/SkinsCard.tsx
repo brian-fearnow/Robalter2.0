@@ -159,7 +159,9 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
     setEditHalfStrokes(activeHalfStrokes);
     setEditManualSkinsStrokes(activeManualSkinsStrokes);
     setEditAdjustStrokes(activeManualSkinsStrokes);
-    setEditSelectedIds(currentNamedIds);
+    // Seed from the actual current skins participants, not all named players
+    const currentSkinsIds = skinsPlayers.map(p => p.id);
+    setEditSelectedIds(currentSkinsIds);
     // Pre-populate from saved skins strokes when manual mode was previously set
     const strokeInputsToUse = activeManualSkinsStrokes
       ? Object.fromEntries(namedPlayers.map(p => [p.id, String(skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap)]))
@@ -184,6 +186,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
 
   const handleSaveEdit = async () => {
     const players = activePlayers.filter(p => editSelectedIds.includes(p.id));
+    if (players.length === 0) return; // require at least one player
     if (isHost) {
       const playersToSend = editAdjustStrokes ? applyStrokeInputs(players, editStrokeInputs) : players;
       await updateSettings(parseFloat(editBuyInInput) || 0, editHalfStrokes, editAdjustStrokes && editManualSkinsStrokes, playersToSend);
@@ -324,7 +327,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                   </div>
 
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                    <button className="primary-btn" onClick={handleSaveEdit} disabled={status === 'connecting'} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
+                    <button className="primary-btn" onClick={handleSaveEdit} disabled={status === 'connecting' || editSelectedIds.length === 0} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
                       Save
                     </button>
                     <button className="secondary-btn" onClick={() => setSubView(null)} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>Cancel</button>
@@ -363,11 +366,11 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                         <span>Course HDCP</span>
                         <span>Strokes</span>
                       </div>
-                      {namedPlayers.map(p => (
+                      {skinsPlayers.filter(p => p.name).map(p => (
                         <div key={p.id} className="skins-player-row skins-player-row--summary">
                           <span>{p.name}</span>
                           <span>{p.courseHandicap}</span>
-                          <span>{activeManualSkinsStrokes ? (skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap}</span>
+                          <span>{activeManualSkinsStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
                         </div>
                       ))}
                     </div>
@@ -384,7 +387,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                           <span style={{ fontFamily: 'sans-serif', fontSize: '0.85rem' }}>
                             {fs.label}
                             <span style={{ color: '#888', fontSize: '0.75rem', marginLeft: '0.4rem' }}>
-                              {fs.players.filter(p => p.name).map(p => p.name.split(' ')[0]).join(', ')}
+                              {(fs.players ?? []).filter(p => p.name).map(p => p.name.split(' ')[0]).join(', ')}
                             </span>
                           </span>
                           <button

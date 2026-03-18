@@ -72,7 +72,7 @@ export function calculateSkinsResults(
   // Each entry carries a globally unique compound key to prevent collisions when
   // multiple foursomes share the same local player IDs ('1', '2', '3', etc.).
   const flatPlayers = foursomes.flatMap(fs =>
-    fs.players
+    (fs.players ?? [])          // Firebase stores [] as null; guard defensively
       .filter(p => p.name)
       .map(p => ({
         uniqueId: `${fs.id}:${p.id}`,   // compound key — unique across all foursomes
@@ -80,7 +80,7 @@ export function calculateSkinsResults(
         foursomeId: fs.id,
         foursomeLabel: fs.label,
         scores: fs.scores ?? {},
-        allPlayersInFoursome: fs.players,
+        allPlayersInFoursome: fs.players ?? [],
       }))
   );
 
