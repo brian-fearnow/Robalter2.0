@@ -51,7 +51,8 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
   const [editSelectedIds, setEditSelectedIds] = useState<string[]>([]);
 
   const {
-    roundId, roomCode, buyIn: activeBuyIn, useHalfStrokes: activeHalfStrokes,
+    roundId, foursomeId, round,
+    roomCode, buyIn: activeBuyIn, useHalfStrokes: activeHalfStrokes,
     useManualSkinsStrokes: activeManualSkinsStrokes,
     myPlayers: skinsPlayers,
     foursomes, isHost, recentRooms, status, error,
@@ -63,6 +64,11 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
 
   const inRound = !!roundId;
   const hasPlayers = namedPlayers.length > 0;
+
+  // True when the host has removed this group: we have a roundId and foursomeId but
+  // the round data is loaded and our foursome no longer appears in it.
+  const wasRemoved = !isHost && inRound && round !== null && !!foursomeId
+    && !foursomes.some(fs => fs.id === foursomeId);
 
   const currentNamedIds = namedPlayers.map(p => p.id);
   const effectiveSelectedIds = selectedPlayerIds.filter(id => currentNamedIds.includes(id));
@@ -339,7 +345,11 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                     <span>Strokes</span>
                     <strong>{activeHalfStrokes ? 'Half strokes' : 'Full strokes'}{activeManualSkinsStrokes ? ' (adjusted)' : ''}</strong>
                   </div>
-                  {foursomes.length > 1 && (
+                  {wasRemoved ? (
+                    <div className="skins-removed-notice">
+                      You have been removed from this skins match by the host. Leave and rejoin if this was an error.
+                    </div>
+                  ) : foursomes.length > 1 && (
                     <div className="res-row">
                       <span>Groups connected</span>
                       <strong>{foursomes.length}</strong>
