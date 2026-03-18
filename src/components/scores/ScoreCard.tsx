@@ -64,6 +64,13 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
 
   const wolfResults = gameMode === 'wolf' ? computeWolfResults() : null;
 
+  // Build a merged player list for skins stroke calculation: overlay manualRelativeStrokes
+  // from skinsState.myPlayers (which has the skins-specific saved values) onto scorecardPlayers.
+  const skinsPlayerMap = Object.fromEntries(skinsState.myPlayers.map(p => [p.id, p]));
+  const skinsScoreCardPlayers = scorecardPlayers.map(p =>
+    skinsPlayerMap[p.id] ? { ...p, manualRelativeStrokes: skinsPlayerMap[p.id].manualRelativeStrokes } : p
+  );
+
   return (
     <div className="scorecard-view" style={{ '--player-count': scorecardPlayers.length || 1 } as React.CSSProperties}>
       {/* Fixed header */}
@@ -71,7 +78,7 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
         <div className="h-cell">Hole</div>
         {scorecardPlayers.map(p => {
           const displayStrokes = (strokeView === 'skins' && skinsState.roundId)
-            ? p.courseHandicap
+            ? (skinsState.useManualSkinsStrokes ? (skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap)
             : (gameMode === 'sixes' || gameMode === 'wheel')
               ? computeStrokesPerSixHoles(p)
               : (settings.useManualStrokes ? p.manualRelativeStrokes : p.courseHandicap - baselineCH);
@@ -145,7 +152,7 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
               </div>
               {scorecardPlayers.map(p => {
                 const strokes = (strokeView === 'skins' && skinsState.roundId)
-                  ? getSkinsStrokesForHole(p.id, h.number, scorecardPlayers, selectedCourse.holes, skinsState.useHalfStrokes)
+                  ? getSkinsStrokesForHole(p.id, h.number, skinsScoreCardPlayers, selectedCourse.holes, skinsState.useHalfStrokes, skinsState.useManualSkinsStrokes)
                   : computeStrokesForHole(p.id, h.number);
                 const netVal = getNetScore(p.id, h.number);
                 if (gameMode === 'book-it') {

@@ -51,9 +51,13 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
   const {
     roundId, roomCode, buyIn: activeBuyIn, useHalfStrokes: activeHalfStrokes,
     useManualSkinsStrokes: activeManualSkinsStrokes,
+    myPlayers: skinsPlayers,
     foursomes, isHost, recentRooms, status, error,
     createRound, joinRound, leaveRound, deleteRound, updateSettings, updateMyGroupPlayers, removeGroup,
   } = skinsState;
+
+  // Build a lookup from the skins-specific player list (has correct manualRelativeStrokes)
+  const skinsPlayerMap = Object.fromEntries(skinsPlayers.map(p => [p.id, p]));
 
   const inRound = !!roundId;
   const hasPlayers = namedPlayers.length > 0;
@@ -140,7 +144,11 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
     setEditManualSkinsStrokes(activeManualSkinsStrokes);
     setEditAdjustStrokes(activeManualSkinsStrokes);
     setEditSelectedIds(currentNamedIds);
-    setEditStrokeInputs(defaultStrokeInputs(namedPlayers));
+    // Pre-populate from saved skins strokes when manual mode was previously set
+    const strokeInputsToUse = activeManualSkinsStrokes
+      ? Object.fromEntries(namedPlayers.map(p => [p.id, String(skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap)]))
+      : defaultStrokeInputs(namedPlayers);
+    setEditStrokeInputs(strokeInputsToUse);
     setSubView('edit');
   };
 
@@ -341,7 +349,7 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                         <div key={p.id} className="skins-player-row skins-player-row--summary">
                           <span>{p.name}</span>
                           <span>{p.courseHandicap}</span>
-                          <span>{p.manualRelativeStrokes !== p.courseHandicap && activeManualSkinsStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
+                          <span>{activeManualSkinsStrokes ? (skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap}</span>
                         </div>
                       ))}
                     </div>
