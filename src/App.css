@@ -961,7 +961,7 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .skins-player-header,
 .skins-player-row {
   display: grid;
-  grid-template-columns: 20px 1fr 36px 52px;
+  grid-template-columns: 20px 1fr 72px 52px;
   align-items: center;
   gap: 4px;
   padding: 3px 0;
@@ -980,6 +980,16 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .skins-player-row span:nth-child(3),
 .skins-player-row span:nth-child(4) { text-align: center; }
 .skins-player-row .manual-stroke-input { width: 44px; text-align: center; }
+/* Summary view (no checkbox column) */
+.skins-player-header--summary,
+.skins-player-row--summary {
+  grid-template-columns: 1fr 72px 52px;
+}
+.skins-player-header--summary span,
+.skins-player-row--summary span:nth-child(2),
+.skins-player-row--summary span:nth-child(3) { text-align: center; }
+.skins-player-header--summary span:first-child,
+.skins-player-row--summary span:first-child { text-align: left; }
 
 /* Stroke-view selector on the Scores tab */
 .stroke-view-selector {

@@ -207,7 +207,7 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
           <div className="skins-player-header">
             <span></span>
             <span>Player</span>
-            <span>CH</span>
+            <span>Course HDCP</span>
             <span>Strokes</span>
           </div>
           {players.map(p => (
@@ -334,12 +334,20 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                   <div style={{ marginTop: '0.5rem', marginBottom: '0.25rem' }}>
                     <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'sans-serif' }}>Your Players</span>
                   </div>
-                  {namedPlayers.map(p => (
-                    <div key={p.id} className="res-row" style={{ paddingTop: '0.3rem', paddingBottom: '0.3rem' }}>
-                      <span>{p.name}</span>
-                      <span style={{ color: '#888', fontFamily: 'sans-serif', fontSize: '0.8rem' }}>CH {p.courseHandicap}</span>
+                  <div className="skins-player-grid">
+                    <div className="skins-player-header skins-player-header--summary">
+                      <span>Player</span>
+                      <span>Course HDCP</span>
+                      <span>Strokes</span>
                     </div>
-                  ))}
+                    {namedPlayers.map(p => (
+                      <div key={p.id} className="skins-player-row skins-player-row--summary">
+                        <span>{p.name}</span>
+                        <span>{p.courseHandicap}</span>
+                        <span>{p.manualRelativeStrokes !== p.courseHandicap && activeManualSkinsStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
+                      </div>
+                    ))}
+                  </div>
 
                   {/* Connected groups (host can remove) */}
                   {isHost && otherFoursomes.length > 0 && (
