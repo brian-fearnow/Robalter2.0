@@ -139,8 +139,8 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
   // --- Leave / Delete ---
 
   const handleLeave = () => {
-    if (window.confirm(`Leave skins game "${roomCode}"? Other foursomes will still be able to see results.`)) {
-      leaveRound();
+    if (window.confirm(`Leave skins game "${roomCode}"? Your group will be removed from the skins calculations.`)) {
+      leaveRound(true);
       setSubView(null);
     }
   };

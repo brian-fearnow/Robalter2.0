@@ -98,8 +98,16 @@ export function useSkinsRound(course: Course) {
   }, []);
 
   // leaveRound is defined early so the Firebase subscription can call it directly.
-  const leaveRound = useCallback(() => {
+  // Pass removeFromServer=true when the user deliberately leaves so the foursome
+  // is removed from Firebase and excluded from results for all other groups.
+  // Reads from localStorage directly so no dep on roundId/foursomeId state.
+  const leaveRound = useCallback((removeFromServer = false) => {
     if (scoreDebounceRef.current) clearTimeout(scoreDebounceRef.current);
+    if (removeFromServer) {
+      const rid = localStorage.getItem(LS_ROUND_ID);
+      const fid = localStorage.getItem(LS_FOURSOME_ID);
+      if (rid && fid) fbRemoveFoursome(rid, fid).catch(() => {});
+    }
     localStorage.removeItem(LS_ROUND_ID);
     localStorage.removeItem(LS_FOURSOME_ID);
     setRoundId(null);
