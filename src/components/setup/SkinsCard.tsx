@@ -283,14 +283,12 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
 
                       <div className="stake-item" style={{ marginBottom: '0.75rem' }}>
                         <span>Stroke Mode</span>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'sans-serif', fontSize: '0.85rem', cursor: 'pointer' }}>
-                          <input
-                            type="checkbox"
-                            checked={editHalfStrokes}
-                            onChange={e => handleEditHalfStrokesChange(e.target.checked)}
-                          />
-                          Half strokes
-                        </label>
+                        <div className="skins-adjust-toggle" style={{ margin: 0 }} onClick={() => handleEditHalfStrokesChange(!editHalfStrokes)}>
+                          <span>Half strokes</span>
+                          <div className={`slider-track ${editHalfStrokes ? 'active' : ''}`}>
+                            <div className="slider-thumb" />
+                          </div>
+                        </div>
                       </div>
                     </>
                   )}
@@ -329,7 +327,7 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                   </div>
                   <div className="res-row">
                     <span>Strokes</span>
-                    <strong>{activeHalfStrokes ? 'Half strokes' : 'Full strokes'}{activeManualSkinsStrokes ? ' (manual)' : ''}</strong>
+                    <strong>{activeHalfStrokes ? 'Half strokes' : 'Full strokes'}{activeManualSkinsStrokes ? ' (adjusted)' : ''}</strong>
                   </div>
                   {foursomes.length > 1 && (
                     <div className="res-row">
@@ -440,14 +438,12 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
 
                   <div className="stake-item" style={{ marginBottom: '0.75rem' }}>
                     <span>Stroke Mode</span>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontFamily: 'sans-serif', fontSize: '0.85rem', cursor: 'pointer' }}>
-                      <input
-                        type="checkbox"
-                        checked={useHalfStrokes}
-                        onChange={e => handleHalfStrokesChange(e.target.checked)}
-                      />
-                      Half strokes
-                    </label>
+                    <div className="skins-adjust-toggle" style={{ margin: 0 }} onClick={() => handleHalfStrokesChange(!useHalfStrokes)}>
+                      <span>Half strokes</span>
+                      <div className={`slider-track ${useHalfStrokes ? 'active' : ''}`}>
+                        <div className="slider-thumb" />
+                      </div>
+                    </div>
                   </div>
 
                   <div style={{ marginBottom: '0.5rem' }}>
