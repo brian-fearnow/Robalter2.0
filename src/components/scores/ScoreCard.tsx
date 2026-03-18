@@ -75,7 +75,11 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
     <div className="scorecard-view" style={{ '--player-count': scorecardPlayers.length || 1 } as React.CSSProperties}>
       {/* Fixed header */}
       <div className="scorecard-header-fixed">
-        <div className="h-cell"></div>
+        <div className="h-cell h-cell--strokes-label">
+          {(gameMode === 'sixes' || gameMode === 'wheel') && strokeView !== 'skins'
+            ? (settings.strokeAllocation === 'divided' ? 'Strokes per 6:' : 'Strokes per 18:')
+            : null}
+        </div>
         {scorecardPlayers.map(p => {
           const displayStrokes = (strokeView === 'skins' && skinsState.roundId)
             ? (skinsState.useManualSkinsStrokes ? (skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap)
@@ -99,11 +103,6 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
         })}
         {gameMode === 'baseball' && <div className="p-cell bb-pts-header">Pts</div>}
       </div>
-
-      {/* Per-6-holes note for Sixes/Wheel with divided allocation */}
-      {(gameMode === 'sixes' || gameMode === 'wheel') && settings.strokeAllocation === 'divided' && strokeView !== 'skins' && (
-        <div className="scorecard-strokes-note">strokes shown are per 6 holes</div>
-      )}
 
       {/* Stroke-view selector — shown when a skins game is active */}
       {skinsState.roundId && (

@@ -991,14 +991,12 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .skins-player-header--summary span:first-child,
 .skins-player-row--summary span:first-child { text-align: left; }
 
-/* Per-6-holes note on the Scores tab */
-.scorecard-strokes-note {
-  text-align: center;
-  font-family: sans-serif;
-  font-size: 0.7rem;
+/* Strokes-per-N label in the scorecard hole-column header */
+.h-cell--strokes-label {
+  font-size: 0.65rem;
   color: #888;
-  padding: 3px 0 1px;
   font-style: italic;
+  white-space: nowrap;
 }
 
 /* Stroke-view selector on the Scores tab */
