@@ -223,12 +223,18 @@ export function useSkinsRound(course: Course) {
       const stored = loadRecentRooms().find(r => r.code === upperCode);
       const storedFoursomeId = stored?.foursomeId;
       const alreadyMember = !!storedFoursomeId && !!existingRound.foursomes?.[storedFoursomeId];
+      // If the host has global manual strokes enabled, ensure joining players have
+      // manualRelativeStrokes initialized from courseHandicap so they don't show 0.
+      // Use || so any value the non-host explicitly set (via Adjust Strokes) is preserved.
+      const playersToStore = existingRound.metadata.useManualSkinsStrokes
+        ? players.map(p => ({ ...p, manualRelativeStrokes: p.manualRelativeStrokes || p.courseHandicap }))
+        : players;
       const resolvedFoursomeId = alreadyMember
         ? storedFoursomeId!
-        : await fbJoinRound(existingRound.id, players);
+        : await fbJoinRound(existingRound.id, playersToStore);
       setRoundId(existingRound.id);
       setFoursomeId(resolvedFoursomeId);
-      setMyPlayers(players);
+      setMyPlayers(alreadyMember ? players : playersToStore);
       saveRecentRoom(upperCode, existingRound.metadata.courseName, resolvedFoursomeId, existingRound.id);
       setRecentRooms(loadRecentRooms());
       return null;
