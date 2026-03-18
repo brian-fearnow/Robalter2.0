@@ -214,12 +214,17 @@ export function useSkinsRound(course: Course) {
   }, [roundId, foursomeId]);
 
   const updateMyPlayers = useCallback((players: Player[]) => {
-    // Preserve skins-specific manualRelativeStrokes — never let the main app's
-    // stroke summary overwrite adjustments made within the skins game.
-    const merged = players.map(p => {
-      const existing = myPlayersRef.current.find(mp => mp.id === p.id);
-      return existing ? { ...p, manualRelativeStrokes: existing.manualRelativeStrokes } : p;
-    });
+    // Only update players already in the skins game — never add new ones.
+    // This prevents the App.tsx activePlayers sync from undoing deliberate
+    // deselections made during create/join. Also preserve skins-specific
+    // manualRelativeStrokes so the main stroke summary can't overwrite them.
+    const currentIds = new Set(myPlayersRef.current.map(p => p.id));
+    const merged = players
+      .filter(p => currentIds.has(p.id))
+      .map(p => {
+        const existing = myPlayersRef.current.find(mp => mp.id === p.id);
+        return existing ? { ...p, manualRelativeStrokes: existing.manualRelativeStrokes } : p;
+      });
     setMyPlayers(merged);
     if (!roundId || !foursomeId) return;
     updateFoursomePlayers(roundId, foursomeId, merged).catch(console.error);
