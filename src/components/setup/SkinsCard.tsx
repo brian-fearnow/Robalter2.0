@@ -334,7 +334,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                 /* ── Active round summary ── */
                 <>
                   <div className="res-row">
-                    <span>Room Code</span>
+                    <span>Access Code</span>
                     <strong>{roomCode}</strong>
                   </div>
                   <div className="res-row">
@@ -492,7 +492,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
               {subView === 'join' && (
                 <div style={{ marginTop: '0.5rem' }}>
                   <div className="stake-item" style={{ marginBottom: '0.75rem' }}>
-                    <span>Room Code</span>
+                    <span>Access Code</span>
                     <input
                       className="skins-code-input"
                       placeholder="e.g. REDEAGLE07"
