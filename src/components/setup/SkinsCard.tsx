@@ -359,22 +359,24 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                     </div>
                   )}
 
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <div className="skins-player-grid">
-                      <div className="skins-player-header skins-player-header--summary">
-                        <span>Player</span>
-                        <span>Course HDCP</span>
-                        <span>Strokes</span>
-                      </div>
-                      {skinsPlayers.filter(p => p.name).map(p => (
-                        <div key={p.id} className="skins-player-row skins-player-row--summary">
-                          <span>{p.name}</span>
-                          <span>{p.courseHandicap}</span>
-                          <span>{activeManualSkinsStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
+                  {!wasRemoved && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <div className="skins-player-grid">
+                        <div className="skins-player-header skins-player-header--summary">
+                          <span>Player</span>
+                          <span>Course HDCP</span>
+                          <span>Strokes</span>
                         </div>
-                      ))}
+                        {skinsPlayers.filter(p => p.name).map(p => (
+                          <div key={p.id} className="skins-player-row skins-player-row--summary">
+                            <span>{p.name}</span>
+                            <span>{p.courseHandicap}</span>
+                            <span>{activeManualSkinsStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Connected groups (host can remove) */}
                   {isHost && otherFoursomes.length > 0 && (
@@ -407,9 +409,11 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                   )}
 
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-                    <button className="skins-action-btn" onClick={openEdit}>
-                      <Settings size={13} /> {isHost ? 'Edit Settings' : 'Edit Players'}
-                    </button>
+                    {!wasRemoved && (
+                      <button className="skins-action-btn" onClick={openEdit}>
+                        <Settings size={13} /> {isHost ? 'Edit Settings' : 'Edit Players'}
+                      </button>
+                    )}
                     <button className="skins-action-btn" onClick={handleLeave}>
                       <LogOut size={13} /> Leave
                     </button>
