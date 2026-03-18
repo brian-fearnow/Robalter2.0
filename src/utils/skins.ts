@@ -81,6 +81,8 @@ export function calculateSkinsResults(
         foursomeLabel: fs.label,
         scores: fs.scores ?? {},
         allPlayersInFoursome: fs.players ?? [],
+        // Per-foursome flag takes precedence; falls back to global flag
+        useManualStrokes: fs.useManualStrokes ?? useManualSkinsStrokes,
       }))
   );
 
@@ -97,8 +99,8 @@ export function calculateSkinsResults(
   for (const hole of courseHoles) {
     // Net scores compared across ALL foursomes — winner is lowest net among all participants.
     const netScores: Record<string, number> = {};
-    for (const { uniqueId, player, allPlayersInFoursome, scores } of flatPlayers) {
-      const net = getSkinsNetScore(player.id, hole.number, allPlayersInFoursome, courseHoles, scores, useHalfStrokes, useManualSkinsStrokes);
+    for (const { uniqueId, player, allPlayersInFoursome, scores, useManualStrokes } of flatPlayers) {
+      const net = getSkinsNetScore(player.id, hole.number, allPlayersInFoursome, courseHoles, scores, useHalfStrokes, useManualStrokes);
       if (net !== null) netScores[uniqueId] = net;
     }
 

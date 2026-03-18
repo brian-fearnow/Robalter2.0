@@ -55,6 +55,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
     roundId, foursomeId, round,
     roomCode, buyIn: activeBuyIn, useHalfStrokes: activeHalfStrokes,
     useManualSkinsStrokes: activeManualSkinsStrokes,
+    myUseManualStrokes,
     myPlayers: skinsPlayers,
     foursomes, isHost, recentRooms, status, error,
     createRound, joinRound, leaveRound, deleteRound, updateSettings, updateMyGroupPlayers, removeGroup, updateOtherFoursomePlayers,
@@ -214,7 +215,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
       }
     } else {
       const playersToSend = editAdjustStrokes ? applyStrokeInputs(players, editStrokeInputs) : players;
-      await updateMyGroupPlayers(playersToSend);
+      await updateMyGroupPlayers(playersToSend, editAdjustStrokes ? true : false);
     }
     setSubView(null);
   };
@@ -411,7 +412,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                   </div>
                   <div className="res-row">
                     <span>Strokes</span>
-                    <strong>{activeHalfStrokes ? 'Half strokes' : 'Full strokes'}{activeManualSkinsStrokes ? ' (adjusted)' : ''}</strong>
+                    <strong>{activeHalfStrokes ? 'Half strokes' : 'Full strokes'}{myUseManualStrokes ? ' (adjusted)' : ''}</strong>
                   </div>
                   {wasRemoved ? (
                     <div className="skins-removed-notice">
@@ -463,7 +464,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                             <div key={p.id} className="skins-player-row skins-player-row--summary">
                               <span>{p.name}</span>
                               <span>{p.courseHandicap}</span>
-                              <span>{activeManualSkinsStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
+                              <span>{myUseManualStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
                             </div>
                           ))
                         )}

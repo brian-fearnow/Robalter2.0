@@ -20,6 +20,7 @@ export interface SkinsFoursome {
   players: Player[];
   scores: Score;         // { [playerId]: { [hole]: grossScore } }
   lastUpdated: number;
+  useManualStrokes?: boolean;  // per-foursome flag; non-hosts set this independently of the global flag
 }
 
 export interface SkinsRound {

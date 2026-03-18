@@ -82,7 +82,7 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
         </div>
         {scorecardPlayers.map(p => {
           const displayStrokes = (strokeView === 'skins' && skinsState.roundId)
-            ? (skinsState.useManualSkinsStrokes ? (skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap)
+            ? (skinsState.myUseManualStrokes ? (skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap)
             : (gameMode === 'sixes' || gameMode === 'wheel') && settings.strokeAllocation === 'divided'
               ? computeStrokesPerSixHoles(p)
               : (gameMode === 'independent' || gameMode === 'book-it')
@@ -157,7 +157,7 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
               </div>
               {scorecardPlayers.map(p => {
                 const strokes = (strokeView === 'skins' && skinsState.roundId)
-                  ? getSkinsStrokesForHole(p.id, h.number, skinsScoreCardPlayers, selectedCourse.holes, skinsState.useHalfStrokes, skinsState.useManualSkinsStrokes)
+                  ? getSkinsStrokesForHole(p.id, h.number, skinsScoreCardPlayers, selectedCourse.holes, skinsState.useHalfStrokes, skinsState.myUseManualStrokes)
                   : computeStrokesForHole(p.id, h.number);
                 const netVal = getNetScore(p.id, h.number);
                 if (gameMode === 'book-it') {

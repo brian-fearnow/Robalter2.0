@@ -281,10 +281,10 @@ export function useSkinsRound(course: Course) {
   }, [roundId, foursomeId]);
 
   // Any group member: updates only their own participating player list.
-  const updateMyGroupPlayers = useCallback(async (players: Player[]) => {
+  const updateMyGroupPlayers = useCallback(async (players: Player[], useManualStrokes?: boolean) => {
     if (!roundId || !foursomeId) return;
     setMyPlayers(players);
-    await updateFoursomePlayers(roundId, foursomeId, players);
+    await updateFoursomePlayers(roundId, foursomeId, players, useManualStrokes);
   }, [roundId, foursomeId]);
 
   const removeGroup = useCallback(async (targetFoursomeId: string) => {
@@ -330,6 +330,14 @@ export function useSkinsRound(course: Course) {
     [foursomes, foursomeId]
   );
 
+  // True if manual strokes should be used for this group's display and scoring.
+  // The global metadata flag takes precedence (host-set); otherwise uses the
+  // per-foursome flag so non-hosts can enable adjustments independently.
+  const myUseManualStrokes = useMemo(() => {
+    if (round?.metadata.useManualSkinsStrokes) return true;
+    return foursomes.find(fs => fs.id === foursomeId)?.useManualStrokes ?? false;
+  }, [round?.metadata.useManualSkinsStrokes, foursomeId, foursomes]);
+
   return {
     // State
     roundId,
@@ -348,6 +356,7 @@ export function useSkinsRound(course: Course) {
     buyIn: round?.metadata.buyIn ?? 0,
     useHalfStrokes: round?.metadata.useHalfStrokes ?? false,
     useManualSkinsStrokes: round?.metadata.useManualSkinsStrokes ?? false,
+    myUseManualStrokes,
     // Actions
     createRound,
     joinRound,

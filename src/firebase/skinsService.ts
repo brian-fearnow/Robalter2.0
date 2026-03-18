@@ -139,12 +139,12 @@ export async function joinRound(
 export async function updateFoursomePlayers(
   roundId: string,
   foursomeId: string,
-  players: Player[]
+  players: Player[],
+  useManualStrokes?: boolean,
 ): Promise<void> {
-  await update(ref(db, `rounds/${roundId}/foursomes/${foursomeId}`), {
-    players,
-    lastUpdated: Date.now(),
-  });
+  const updates: Record<string, unknown> = { players, lastUpdated: Date.now() };
+  if (useManualStrokes !== undefined) updates.useManualStrokes = useManualStrokes;
+  await update(ref(db, `rounds/${roundId}/foursomes/${foursomeId}`), updates);
 }
 
 export async function updateFoursomeScores(
