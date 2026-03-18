@@ -355,6 +355,15 @@ export function SetupTab({ appState, skinsState }: SetupTabProps) {
           onClose={() => { setGhinRefreshModalOpen(false); setPendingGhinRefresh(false); }}
         />
       )}
+
+      <div className="mt-6 pb-4 text-center text-sm text-gray-400">
+        <a
+          href="mailto:brian.fearnow@gmail.com?subject=Robalter%20Bug%20Report%20%2F%20Feature%20Request"
+          className="underline hover:text-gray-600"
+        >
+          Report a bug or suggest a feature
+        </a>
+      </div>
     </div>
   );
 }
