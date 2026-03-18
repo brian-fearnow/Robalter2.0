@@ -288,7 +288,6 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                   )}
 
                   <div style={{ marginBottom: '0.75rem' }}>
-                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'sans-serif' }}>Your Players</span>
                     <div style={{ marginTop: '0.35rem' }}>
                       {renderPlayerGrid(
                         namedPlayers,
@@ -331,9 +330,7 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                     </div>
                   )}
 
-                  <div style={{ marginTop: '0.5rem', marginBottom: '0.25rem' }}>
-                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'sans-serif' }}>Your Players</span>
-                  </div>
+                  <div style={{ marginTop: '0.5rem' }}>
                   <div className="skins-player-grid">
                     <div className="skins-player-header skins-player-header--summary">
                       <span>Player</span>
@@ -445,18 +442,15 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                   </div>
 
                   <div style={{ marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'sans-serif' }}>Participating Players</span>
-                    <div style={{ marginTop: '0.35rem' }}>
-                      {renderPlayerGrid(
-                        namedPlayers,
-                        effectiveSelectedIds,
-                        togglePlayer,
-                        adjustStrokes,
-                        strokeInputs,
-                        (id, val) => setStrokeInputs(prev => ({ ...prev, [id]: val })),
-                        toggleAdjustStrokes,
-                      )}
-                    </div>
+                    {renderPlayerGrid(
+                      namedPlayers,
+                      effectiveSelectedIds,
+                      togglePlayer,
+                      adjustStrokes,
+                      strokeInputs,
+                      (id, val) => setStrokeInputs(prev => ({ ...prev, [id]: val })),
+                      toggleAdjustStrokes,
+                    )}
                   </div>
 
                   {error && <p style={{ color: '#c0392b', fontSize: '0.8rem', fontFamily: 'sans-serif', margin: '4px 0' }}>{error}</p>}
@@ -497,18 +491,15 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                   )}
 
                   <div style={{ marginBottom: '0.75rem' }}>
-                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'sans-serif' }}>Participating Players</span>
-                    <div style={{ marginTop: '0.35rem' }}>
-                      {renderPlayerGrid(
-                        namedPlayers,
-                        effectiveSelectedIds,
-                        togglePlayer,
-                        adjustStrokes,
-                        strokeInputs,
-                        (id, val) => setStrokeInputs(prev => ({ ...prev, [id]: val })),
-                        toggleAdjustStrokes,
-                      )}
-                    </div>
+                    {renderPlayerGrid(
+                      namedPlayers,
+                      effectiveSelectedIds,
+                      togglePlayer,
+                      adjustStrokes,
+                      strokeInputs,
+                      (id, val) => setStrokeInputs(prev => ({ ...prev, [id]: val })),
+                      toggleAdjustStrokes,
+                    )}
                   </div>
 
                   {error && <p style={{ color: '#c0392b', fontSize: '0.8rem', fontFamily: 'sans-serif', margin: '4px 0' }}>{error}</p>}
