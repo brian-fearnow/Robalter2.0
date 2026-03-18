@@ -356,6 +356,17 @@ export function useAppState() {
     setIsCourseModalOpen(true);
   }, []);
 
+  // Ensures a course (e.g. received from a skins game server) is present locally
+  // and selects it. If a course with the same ID already exists it is kept as-is;
+  // otherwise the full course object is added. No duplicate records are created.
+  const ensureCourse = useCallback((newCourse: Course) => {
+    setCourses(prev => {
+      if (prev.some(c => c.id === newCourse.id)) return prev;
+      return [...prev, newCourse];
+    });
+    setSelectedCourseId(newCourse.id);
+  }, []);
+
   const deleteCourse = useCallback((id: string) => {
     if (PERMANENT_COURSE_IDS.includes(id as typeof PERMANENT_COURSE_IDS[number])) return;
     const courseToDelete = courses.find(c => c.id === id);
@@ -898,6 +909,7 @@ export function useAppState() {
     startNewCourse,
     importCourse,
     deleteCourse,
+    ensureCourse,
     handleGameModeChange,
     addIndependentMatch,
     updateIndependentMatch,

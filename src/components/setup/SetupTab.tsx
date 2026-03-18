@@ -287,7 +287,7 @@ export function SetupTab({ appState, skinsState }: SetupTabProps) {
       />
 
       {/* Skins */}
-      <SkinsCard skinsState={skinsState} activePlayers={activePlayers} />
+      <SkinsCard skinsState={skinsState} activePlayers={activePlayers} onCourseChange={appState.ensureCourse} />
 
       {/* Reset */}
       <div className="card reset-card">

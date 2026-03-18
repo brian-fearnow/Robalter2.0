@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Trash2, LogOut, Settings, X } from 'lucide-react';
-import type { Player } from '../../types';
+import type { Player, Course } from '../../types';
 import type { SkinsRoundState } from '../../hooks/useSkinsRound';
+
 interface SkinsCardProps {
   skinsState: SkinsRoundState;
   activePlayers: Player[];
+  onCourseChange: (course: Course) => void;
 }
 
 type SubView = null | 'create' | 'join' | 'edit';
@@ -27,7 +29,7 @@ function applyStrokeInputs(players: Player[], strokeInputs: Record<string, strin
   }));
 }
 
-export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
+export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCardProps) {
   const [expanded, setExpanded] = useState(true);
   const [subView, setSubView] = useState<SubView>(null);
   const [buyInInput, setBuyInInput] = useState('50');
@@ -108,7 +110,15 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
     const playersToSend = adjustStrokes
       ? applyStrokeInputs(selectedPlayers, strokeInputs)
       : selectedPlayers;
-    await joinRound(code.trim(), playersToSend);
+    const courseMismatch = await joinRound(code.trim(), playersToSend);
+    if (courseMismatch) {
+      // The host is playing a different course. Confirm and switch, then retry.
+      const msg = `This skins game is being played on "${courseMismatch.name}". Your course will be changed to match. Continue?`;
+      if (!window.confirm(msg)) return;
+      onCourseChange(courseMismatch);
+      // Re-attempt with skipCourseCheck=true since course state hasn't re-rendered yet
+      await joinRound(code.trim(), playersToSend, true);
+    }
     setSubView(null);
     setJoinCode('');
   };

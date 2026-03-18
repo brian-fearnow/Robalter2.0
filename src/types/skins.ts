@@ -1,4 +1,4 @@
-import type { Player, Score } from './index';
+import type { Player, Score, Course } from './index';
 
 // --- Firebase-persisted structures ---
 
@@ -6,6 +6,7 @@ export interface SkinsRoundMetadata {
   code: string;
   courseId: string;
   courseName: string;
+  courseData: Course;              // full course object so joining groups can sync to the host's course
   buyIn: number;                   // flat entry fee per participating player
   useHalfStrokes: boolean;         // when true, each stroke is worth 0.5
   useManualSkinsStrokes: boolean;  // when true, use player.manualRelativeStrokes instead of courseHandicap

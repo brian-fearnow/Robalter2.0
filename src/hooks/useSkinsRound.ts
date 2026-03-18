@@ -143,6 +143,7 @@ export function useSkinsRound(course: Course) {
       const result = await fbCreateRound({
         courseId: course.id,
         courseName: course.name,
+        courseData: course,
         buyIn,
         useHalfStrokes,
         useManualSkinsStrokes,
@@ -161,7 +162,9 @@ export function useSkinsRound(course: Course) {
     }
   }, [course]);
 
-  const joinRound = useCallback(async (code: string, players: Player[]): Promise<void> => {
+  // Returns the server's course if it differs from the current course, otherwise null.
+  // Pass skipCourseCheck=true on a re-attempt after the caller has already switched courses.
+  const joinRound = useCallback(async (code: string, players: Player[], skipCourseCheck = false): Promise<Course | null> => {
     setStatus('connecting');
     setError(null);
     try {
@@ -169,7 +172,14 @@ export function useSkinsRound(course: Course) {
       if (!existingRound) {
         setError(`No round found with code "${code.toUpperCase()}".`);
         setStatus('idle');
-        return;
+        return null;
+      }
+      // If the host's course differs from this group's current course, surface it
+      // so the caller can confirm and switch before we finalise the join.
+      const serverCourse = existingRound.metadata.courseData ?? null;
+      if (!skipCourseCheck && serverCourse && serverCourse.id !== course.id) {
+        setStatus('idle');
+        return serverCourse;
       }
       // If we previously joined this round, try to restore our original foursome
       // rather than creating a new one (handles leave → rejoin flow).
@@ -185,12 +195,13 @@ export function useSkinsRound(course: Course) {
       setMyPlayers(players);
       saveRecentRoom(upperCode, existingRound.metadata.courseName, resolvedFoursomeId, existingRound.id);
       setRecentRooms(loadRecentRooms());
+      return null;
     } catch (e) {
       setStatus('error');
       setError('Failed to join round. Check your connection.');
       throw e;
     }
-  }, []);
+  }, [course]);
 
   // Sync scores from the main app to Firebase whenever they change.
   // Called by SkinsApp via a useEffect watching appState.scores.

@@ -1,6 +1,6 @@
 import { ref, push, set, get, update, remove, onValue, off } from 'firebase/database';
 import { db } from './config';
-import type { Player, Score } from '../types';
+import type { Player, Score, Course } from '../types';
 import type { SkinsRound, SkinsFoursome, SkinsRoundMetadata } from '../types/skins';
 
 // --- Room code generation ---
@@ -33,6 +33,7 @@ export function generateRoomCode(): string {
 export interface CreateRoundParams {
   courseId: string;
   courseName: string;
+  courseData: Course;
   buyIn: number;
   useHalfStrokes: boolean;
   useManualSkinsStrokes: boolean;
@@ -65,6 +66,7 @@ export async function createRound(
     code,
     courseId: params.courseId,
     courseName: params.courseName,
+    courseData: params.courseData,
     buyIn: params.buyIn,
     useHalfStrokes: params.useHalfStrokes,
     useManualSkinsStrokes: params.useManualSkinsStrokes,
