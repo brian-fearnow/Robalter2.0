@@ -136,6 +136,16 @@ export function useSkinsRound(course: Course) {
     return unsubscribe;
   }, [roundId, leaveRound, removeFromRecent]);
 
+  // On reconnect after page refresh: restore myPlayers from Firebase once the round
+  // data arrives. myPlayers starts as [] on mount, so we check the ref to avoid
+  // running this after the initial join (where myPlayers is set directly).
+  useEffect(() => {
+    if (!round || !foursomeId) return;
+    if (myPlayersRef.current.length > 0) return; // already populated
+    const fsPlayers = round.foursomes?.[foursomeId]?.players ?? [];
+    if (fsPlayers.length > 0) setMyPlayers(fsPlayers);
+  }, [round, foursomeId]);
+
   // Pre-compute roomCode as a stable string so async callbacks don't need to
   // reach into round.metadata mid-execution (round can become null after deletion).
   const roomCode = round?.metadata.code ?? null;
@@ -222,6 +232,10 @@ export function useSkinsRound(course: Course) {
   }, [roundId, foursomeId]);
 
   const updateMyPlayers = useCallback((players: Player[]) => {
+    // Guard: if myPlayers hasn't been restored yet from Firebase after a page
+    // refresh (roundId exists but myPlayersRef is still empty), skip this call.
+    // The restore effect will populate myPlayersRef once the round data arrives.
+    if (myPlayersRef.current.length === 0 && !!localStorage.getItem(LS_ROUND_ID)) return;
     // Only update players already in the skins game — never add new ones.
     // This prevents the App.tsx activePlayers sync from undoing deliberate
     // deselections made during create/join. Also preserve skins-specific
