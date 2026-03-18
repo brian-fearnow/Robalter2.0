@@ -55,35 +55,44 @@ export function StakesCard({
                   <option value="nassau">Nassau Bet</option>
                 </select>
               </div>
-              {fourBallStakes.type === '18-hole' ? (
-                <div className="im-stake-column">
-                  <div className="im-stake-input">
-                    <span>Main $</span>
-                    <input type="number" value={fourBallStakes.mainOverall || ''} placeholder="0"
-                      onChange={e => onSetFourBallStakes({ ...fourBallStakes, mainOverall: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) })} />
-                  </div>
-                  <div className="im-stake-input">
-                    <span>Press $</span>
-                    <input type="number" value={fourBallStakes.pressOverall || ''} placeholder="0"
-                      onChange={e => onSetFourBallStakes({ ...fourBallStakes, pressOverall: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) })} />
-                  </div>
+              <div className="fb-stakes-grid">
+                {/* Column headers */}
+                <span />
+                <span className="fb-stakes-col-header">Main</span>
+                <span className="fb-stakes-col-header">Press</span>
+
+                {/* Front/Back row — Nassau only */}
+                {fourBallStakes.type === 'nassau' && (
+                  <>
+                    <span className="fb-stakes-row-label">Front/Back ($)</span>
+                    <div className="fb-stakes-input">
+                      <input type="number" value={fourBallStakes.mainFront || ''} placeholder="0"
+                        onChange={e => {
+                          const v = e.target.value === '' ? 0 : (parseInt(e.target.value) || 0);
+                          onSetFourBallStakes({ ...fourBallStakes, mainFront: v, mainBack: v });
+                        }} />
+                    </div>
+                    <div className="fb-stakes-input">
+                      <input type="number" value={fourBallStakes.pressFront || ''} placeholder="0"
+                        onChange={e => {
+                          const v = e.target.value === '' ? 0 : (parseInt(e.target.value) || 0);
+                          onSetFourBallStakes({ ...fourBallStakes, pressFront: v, pressBack: v });
+                        }} />
+                    </div>
+                  </>
+                )}
+
+                {/* Overall row — always shown */}
+                <span className="fb-stakes-row-label">Overall ($)</span>
+                <div className="fb-stakes-input">
+                  <input type="number" value={fourBallStakes.mainOverall || ''} placeholder="0"
+                    onChange={e => onSetFourBallStakes({ ...fourBallStakes, mainOverall: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) })} />
                 </div>
-              ) : (
-                <div className="nassau-stakes-group-vertical">
-                  <div className="im-stake-row">
-                    <div className="im-stake-input"><span>Front $</span><input type="number" value={fourBallStakes.mainFront || ''} placeholder="0" onChange={e => onSetFourBallStakes({ ...fourBallStakes, mainFront: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) })} /></div>
-                    <div className="im-stake-input"><span>Press-Front $</span><input type="number" value={fourBallStakes.pressFront || ''} placeholder="0" onChange={e => onSetFourBallStakes({ ...fourBallStakes, pressFront: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) })} /></div>
-                  </div>
-                  <div className="im-stake-row">
-                    <div className="im-stake-input"><span>Back $</span><input type="number" value={fourBallStakes.mainBack || ''} placeholder="0" onChange={e => onSetFourBallStakes({ ...fourBallStakes, mainBack: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) })} /></div>
-                    <div className="im-stake-input"><span>Press-Back $</span><input type="number" value={fourBallStakes.pressBack || ''} placeholder="0" onChange={e => onSetFourBallStakes({ ...fourBallStakes, pressBack: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) })} /></div>
-                  </div>
-                  <div className="im-stake-row">
-                    <div className="im-stake-input"><span>Overall $</span><input type="number" value={fourBallStakes.mainOverall || ''} placeholder="0" onChange={e => onSetFourBallStakes({ ...fourBallStakes, mainOverall: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) })} /></div>
-                    <div className="im-stake-input"><span>Press-Overall $</span><input type="number" value={fourBallStakes.pressOverall || ''} placeholder="0" onChange={e => onSetFourBallStakes({ ...fourBallStakes, pressOverall: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) })} /></div>
-                  </div>
+                <div className="fb-stakes-input">
+                  <input type="number" value={fourBallStakes.pressOverall || ''} placeholder="0"
+                    onChange={e => onSetFourBallStakes({ ...fourBallStakes, pressOverall: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) })} />
                 </div>
-              )}
+              </div>
             </div>
           ) : gameMode === 'baseball' ? (
             <div className="stake-item">

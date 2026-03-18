@@ -376,6 +376,16 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .fb-type-select { margin-bottom: 4px; }
 .fb-type-select select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-weight: bold; color: var(--mackenzie-green); }
 .lake-theme .fb-type-select select { color: var(--olympic-red); }
+.fb-stakes-grid {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 6px 10px;
+  align-items: center;
+}
+.fb-stakes-col-header { font-size: 0.72rem; color: #999; text-align: center; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.04em; }
+.fb-stakes-row-label { font-size: 0.82rem; color: #555; font-family: sans-serif; }
+.fb-stakes-input { display: inline-flex; align-items: center; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 0 4px; justify-self: center; }
+.fb-stakes-input input { border: none; padding: 4px 2px; width: 40px; font-size: 0.8rem; outline: none; text-align: center; }
 
 
 /* Stakes Layout Refinements */
@@ -957,6 +967,12 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .skins-hole-table tr.skin-won td { background: rgba(0, 75, 40, 0.05); }
 .skins-hole-table .winner-cell { color: var(--mackenzie-green); font-weight: 700; }
 .skins-hole-table .tie-cell { color: #bbb; font-style: italic; }
+.skins-hole-table th.col-sticky,
+.skins-hole-table td.col-sticky {
+  position: sticky; left: 0; z-index: 1;
+  background: #fff;
+}
+.skins-hole-table tr.skin-won td.col-sticky { background: #f5faf7; }
 
 /* Skins player grid (Create / Join / Edit forms) */
 .skins-adjust-toggle {

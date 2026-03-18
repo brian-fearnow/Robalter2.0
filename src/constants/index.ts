@@ -149,8 +149,8 @@ export const DEFAULT_FOUR_BALL_STAKES: FourBallStakes = {
   pressFront: 5,
   mainBack: 10,
   pressBack: 5,
-  mainOverall: 10,
-  pressOverall: 5,
+  mainOverall: 20,
+  pressOverall: 10,
 };
 
 export const DEFAULT_SEGMENTS: MatchSegment[] = [

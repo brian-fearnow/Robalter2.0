@@ -268,7 +268,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
     <div className="card independent-matches-card">
       <div className="collapsible-header" onClick={() => setExpanded(v => !v)}>
         <h3>
-          SKINS <span className="beta-badge">BETA</span>
+          SKINS
           {inRound && roomCode && <span className="skins-code-badge">{roomCode}</span>}
         </h3>
         {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

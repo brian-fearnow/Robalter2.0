@@ -117,35 +117,53 @@ export function IndependentMatchesCard({
                       <option value="nassau">Nassau Bet</option>
                     </select>
                   </div>
-                  {match.type === '18-hole' ? (
-                    <div className="im-stake-column">
-                      <div className="im-stake-input">
-                        <span>Main $</span>
-                        <input type="number" value={match.stake || ''} placeholder="0"
-                          onChange={e => setIndependentMatches(prev => prev.map(im => im.id === match.id ? { ...im, stake: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) } : im))} />
-                      </div>
-                      <div className="im-stake-input">
-                        <span>Press $</span>
-                        <input type="number" value={match.pressStake || ''} placeholder="0"
-                          onChange={e => onUpdateMatch(match.id, 'pressStake', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="nassau-stakes-group-vertical">
-                      <div className="im-stake-row">
-                        <div className="im-stake-input"><span>Front $</span><input type="number" value={match.stake9 || ''} placeholder="0" onChange={e => onUpdateMatch(match.id, 'stake9', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} /></div>
-                        <div className="im-stake-input"><span>Press-Front $</span><input type="number" value={match.pressStake9 || ''} placeholder="0" onChange={e => onUpdateMatch(match.id, 'pressStake9', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} /></div>
-                      </div>
-                      <div className="im-stake-row">
-                        <div className="im-stake-input"><span>Back $</span><input type="number" value={match.stake9 || ''} placeholder="0" onChange={e => onUpdateMatch(match.id, 'stake9', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} /></div>
-                        <div className="im-stake-input"><span>Press-Back $</span><input type="number" value={match.pressStake9 || ''} placeholder="0" onChange={e => onUpdateMatch(match.id, 'pressStake9', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} /></div>
-                      </div>
-                      <div className="im-stake-row">
-                        <div className="im-stake-input"><span>Overall $</span><input type="number" value={match.stake18 || ''} placeholder="0" onChange={e => onUpdateMatch(match.id, 'stake18', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} /></div>
-                        <div className="im-stake-input"><span>Press-Overall $</span><input type="number" value={match.pressStake18 || ''} placeholder="0" onChange={e => onUpdateMatch(match.id, 'pressStake18', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} /></div>
-                      </div>
-                    </div>
-                  )}
+                  <div className="fb-stakes-grid">
+                    {/* Column headers */}
+                    <span />
+                    <span className="fb-stakes-col-header">Main</span>
+                    <span className="fb-stakes-col-header">Press</span>
+
+                    {/* Front/Back row — Nassau only */}
+                    {match.type === 'nassau' && (
+                      <>
+                        <span className="fb-stakes-row-label">Front/Back ($)</span>
+                        <div className="fb-stakes-input">
+                          <input type="number" value={match.stake9 || ''} placeholder="0"
+                            onChange={e => onUpdateMatch(match.id, 'stake9', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} />
+                        </div>
+                        <div className="fb-stakes-input">
+                          <input type="number" value={match.pressStake9 || ''} placeholder="0"
+                            onChange={e => onUpdateMatch(match.id, 'pressStake9', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} />
+                        </div>
+                      </>
+                    )}
+
+                    {/* Overall row — always shown */}
+                    <span className="fb-stakes-row-label">Overall ($)</span>
+                    {match.type === 'nassau' ? (
+                      <>
+                        <div className="fb-stakes-input">
+                          <input type="number" value={match.stake18 || ''} placeholder="0"
+                            onChange={e => onUpdateMatch(match.id, 'stake18', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} />
+                        </div>
+                        <div className="fb-stakes-input">
+                          <input type="number" value={match.pressStake18 || ''} placeholder="0"
+                            onChange={e => onUpdateMatch(match.id, 'pressStake18', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="fb-stakes-input">
+                          <input type="number" value={match.stake || ''} placeholder="0"
+                            onChange={e => setIndependentMatches(prev => prev.map(im => im.id === match.id ? { ...im, stake: e.target.value === '' ? 0 : (parseInt(e.target.value) || 0) } : im))} />
+                        </div>
+                        <div className="fb-stakes-input">
+                          <input type="number" value={match.pressStake || ''} placeholder="0"
+                            onChange={e => onUpdateMatch(match.id, 'pressStake', e.target.value === '' ? 0 : (parseInt(e.target.value) || 0))} />
+                        </div>
+                      </>
+                    )}
+                  </div>
                   <button className="icon-btn remove-im" onClick={() => onDeleteMatch(match.id)}>
                     <Trash2 size={14} />
                   </button>

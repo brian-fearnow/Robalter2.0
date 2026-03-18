@@ -81,7 +81,7 @@ export function SkinsResultsCard({ skinsState }: SkinsResultsCardProps) {
           <table className="skins-hole-table">
             <thead>
               <tr>
-                <th>Hole</th>
+                <th className="col-sticky">Hole</th>
                 {allPlayers.map(p => (
                   <th key={`${p.foursomeId}:${p.id}`}>{p.name.split(' ')[0]}</th>
                 ))}
@@ -95,7 +95,7 @@ export function SkinsResultsCard({ skinsState }: SkinsResultsCardProps) {
                   : null;
                 return (
                   <tr key={hole.holeNumber} className={hole.skinAwarded ? 'skin-won' : ''}>
-                    <td>{hole.holeNumber}</td>
+                    <td className="col-sticky">{hole.holeNumber}</td>
                     {allPlayers.map(p => {
                       const uid = `${p.foursomeId}:${p.id}`;
                       const net = hole.allNetScores[uid];
