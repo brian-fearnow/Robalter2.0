@@ -26,7 +26,7 @@ export function AppHeader({ appState }: AppHeaderProps) {
         </select>
       </div>
       <div className="header-text-only">
-        <h1>{selectedCourse.name.toUpperCase()}</h1>
+        <h1 className={selectedCourse.id === 'meadow-club-new' ? 'h1-compact' : ''}>{selectedCourse.name.toUpperCase()}</h1>
         {(selectedCourse.id === 'meadow-club' || selectedCourse.id === 'meadow-club-new') && (
           <p>ESTABLISHED 1927</p>
         )}

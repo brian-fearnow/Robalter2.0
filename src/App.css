@@ -69,6 +69,7 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 }
 
 .header-text-only h1 { font-size: 1rem; letter-spacing: 4px; font-weight: normal; margin: 0; }
+.header-text-only h1.h1-compact { font-size: 0.78rem; letter-spacing: 2px; }
 .header-text-only p { font-size: 0.55rem; letter-spacing: 3px; color: var(--heritage-gold); margin: 4px 0 0 0; font-family: sans-serif; font-weight: bold; }
 
 .app-content {
