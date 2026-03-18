@@ -589,7 +589,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                     <span>Access Code</span>
                     <input
                       className="skins-code-input"
-                      placeholder=""
+                      placeholder="Input Access Code"
                       value={joinCode}
                       onChange={e => setJoinCode(e.target.value.toUpperCase())}
                     />

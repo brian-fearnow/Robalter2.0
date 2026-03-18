@@ -914,6 +914,7 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
   border-radius: 4px; font-size: 0.85rem; text-transform: uppercase; font-family: sans-serif;
   font-weight: 700; color: var(--mackenzie-green); letter-spacing: 0.05em;
 }
+.skins-code-input::placeholder { color: #bbb; font-style: italic; font-weight: normal; text-transform: none; letter-spacing: normal; }
 .skins-action-btn {
   display: flex; align-items: center; gap: 5px; background: none;
   border: 1px solid var(--border-light); border-radius: 4px;
