@@ -100,6 +100,11 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
         {gameMode === 'baseball' && <div className="p-cell bb-pts-header">Pts</div>}
       </div>
 
+      {/* Per-6-holes note for Sixes/Wheel with divided allocation */}
+      {(gameMode === 'sixes' || gameMode === 'wheel') && settings.strokeAllocation === 'divided' && strokeView !== 'skins' && (
+        <div className="scorecard-strokes-note">strokes shown are per 6 holes</div>
+      )}
+
       {/* Stroke-view selector — shown when a skins game is active */}
       {skinsState.roundId && (
         <div className="stroke-view-selector">
