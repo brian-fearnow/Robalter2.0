@@ -58,6 +58,10 @@ export function useSkinsRound(course: Course) {
   // Tracks the current room code so the subscription callback can read it
   // even though the callback is a closure that can't capture reactive state.
   const roomCodeRef = useRef<string | null>(null);
+  // Tracks current myPlayers without being a useCallback dependency,
+  // so updateMyPlayers can preserve skins-specific manualRelativeStrokes
+  // without creating a dependency loop.
+  const myPlayersRef = useRef<Player[]>([]);
 
   // Persist roundId / foursomeId to localStorage for reconnect on page refresh
   useEffect(() => {
@@ -127,7 +131,8 @@ export function useSkinsRound(course: Course) {
   // Pre-compute roomCode as a stable string so async callbacks don't need to
   // reach into round.metadata mid-execution (round can become null after deletion).
   const roomCode = round?.metadata.code ?? null;
-  roomCodeRef.current = roomCode; // keep ref in sync for subscription callback
+  roomCodeRef.current = roomCode;   // keep ref in sync for subscription callback
+  myPlayersRef.current = myPlayers; // keep ref in sync so updateMyPlayers can read it without a dep
 
   // --- Actions ---
 
@@ -198,9 +203,15 @@ export function useSkinsRound(course: Course) {
   }, [roundId, foursomeId]);
 
   const updateMyPlayers = useCallback((players: Player[]) => {
-    setMyPlayers(players);
+    // Preserve skins-specific manualRelativeStrokes — never let the main app's
+    // stroke summary overwrite adjustments made within the skins game.
+    const merged = players.map(p => {
+      const existing = myPlayersRef.current.find(mp => mp.id === p.id);
+      return existing ? { ...p, manualRelativeStrokes: existing.manualRelativeStrokes } : p;
+    });
+    setMyPlayers(merged);
     if (!roundId || !foursomeId) return;
-    updateFoursomePlayers(roundId, foursomeId, players).catch(console.error);
+    updateFoursomePlayers(roundId, foursomeId, merged).catch(console.error);
   }, [roundId, foursomeId]);
 
   // Host-only: updates buy-in, stroke mode, and the host's own player list.
