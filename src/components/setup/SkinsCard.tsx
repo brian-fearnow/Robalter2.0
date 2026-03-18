@@ -205,16 +205,20 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
     if (isHost) {
       const playersToSend = editAdjustStrokes ? applyStrokeInputs(players, editStrokeInputs) : players;
       await updateSettings(parseFloat(editBuyInInput) || 0, editHalfStrokes, editAdjustStrokes && editManualSkinsStrokes, playersToSend);
-      // Update stroke values for non-host foursomes if adjust strokes is on
-      if (editAdjustStrokes) {
-        for (const fs of otherFoursomes) {
-          const fsPlayers = (fs.players ?? []).filter(p => p.name);
-          if (fsPlayers.length === 0) continue;
+      // Update non-host foursomes: save edited strokes when on, clear the
+      // per-foursome useManualStrokes flag when off so strokes revert to calculated.
+      for (const fs of otherFoursomes) {
+        const fsPlayers = (fs.players ?? []).filter(p => p.name);
+        if (fsPlayers.length === 0) continue;
+        if (editAdjustStrokes) {
           const updated = fsPlayers.map(p => ({
             ...p,
             manualRelativeStrokes: parseFloat(editOtherStrokeInputs[fs.id]?.[p.id] ?? '') || 0,
           }));
           await updateOtherFoursomePlayers(fs.id, updated);
+        } else {
+          // Clear the per-foursome flag so scoring reverts to courseHandicap
+          await updateOtherFoursomePlayers(fs.id, fsPlayers, false);
         }
       }
     } else {
