@@ -1,5 +1,5 @@
 import { useState, Fragment } from 'react';
-import { ChevronDown, ChevronUp, Trash2, LogOut, Settings, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Trash2, LogOut, Settings } from 'lucide-react';
 import type { Player, Course } from '../../types';
 import type { SkinsRoundState } from '../../hooks/useSkinsRound';
 
@@ -174,7 +174,11 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
     otherFoursomes.forEach(fs => {
       const fsPlayers = (fs.players ?? []).filter(p => p.name);
       otherInputs[fs.id] = Object.fromEntries(
-        fsPlayers.map(p => [p.id, String(activeManualSkinsStrokes ? (p.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap)])
+        fsPlayers.map(p => [p.id, String(
+          (fs.useManualStrokes || activeManualSkinsStrokes)
+            ? (p.manualRelativeStrokes ?? p.courseHandicap)
+            : p.courseHandicap
+        )])
       );
     });
     setEditOtherStrokeInputs(otherInputs);
@@ -381,7 +385,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                                       }))}
                                     />
                                   ) : (
-                                    <span>{p.courseHandicap}</span>
+                                    <span>{(fs.useManualStrokes || activeManualSkinsStrokes) ? (p.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap}</span>
                                   )}
                                 </div>
                               ))}
@@ -441,11 +445,25 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                               <Fragment key={fs.id}>
                                 {foursomes.length > 1 && (
                                   <div className="skins-group-divider-row">
-                                    {fs.id === foursomeId ? 'Your Group' : fs.label}
+                                    <span>{fs.id === foursomeId ? 'Your Group' : fs.label}</span>
+                                    {fs.id !== foursomeId && (
+                                      <button
+                                        className="icon-btn delete-partner"
+                                        title="Remove group"
+                                        onClick={() => {
+                                          if (window.confirm(`Remove ${fs.label} from this skins game?`)) {
+                                            removeGroup(fs.id);
+                                          }
+                                        }}
+                                      >
+                                        <Trash2 size={11} />
+                                      </button>
+                                    )}
                                   </div>
                                 )}
                                 {fsPlayers.map(p => {
-                                  const strokes = activeManualSkinsStrokes
+                                  const useManual = fs.useManualStrokes || activeManualSkinsStrokes;
+                                  const strokes = useManual
                                     ? (p.manualRelativeStrokes ?? p.courseHandicap)
                                     : p.courseHandicap;
                                   return (
@@ -472,35 +490,6 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                     </div>
                   )}
 
-                  {/* Connected groups (host can remove) */}
-                  {isHost && otherFoursomes.length > 0 && (
-                    <>
-                      <div style={{ marginTop: '0.75rem', marginBottom: '0.25rem' }}>
-                        <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'sans-serif' }}>Connected Groups</span>
-                      </div>
-                      {otherFoursomes.map(fs => (
-                        <div key={fs.id} className="res-row" style={{ paddingTop: '0.3rem', paddingBottom: '0.3rem' }}>
-                          <span style={{ fontFamily: 'sans-serif', fontSize: '0.85rem' }}>
-                            {fs.label}
-                            <span style={{ color: '#888', fontSize: '0.75rem', marginLeft: '0.4rem' }}>
-                              {(fs.players ?? []).filter(p => p.name).map(p => p.name.split(' ')[0]).join(', ')}
-                            </span>
-                          </span>
-                          <button
-                            className="icon-btn delete-partner"
-                            title="Remove group"
-                            onClick={() => {
-                              if (window.confirm(`Remove ${fs.label} from this skins game?`)) {
-                                removeGroup(fs.id);
-                              }
-                            }}
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
-                    </>
-                  )}
 
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
                     {!wasRemoved && (

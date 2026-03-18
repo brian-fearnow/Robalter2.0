@@ -1025,6 +1025,7 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 /* Divider row inside the summary grid spanning all columns */
 .skins-group-divider-row {
   grid-column: 1 / -1;
+  display: flex; align-items: center; justify-content: space-between;
   font-size: 0.65rem; color: #999; text-transform: uppercase;
   letter-spacing: 0.05em; font-family: sans-serif;
   padding: 5px 0 2px; border-top: 1px solid #eee; margin-top: 2px;
