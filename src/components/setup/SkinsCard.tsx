@@ -240,16 +240,21 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
     inputs: Record<string, string>,
     onInputChange: (id: string, val: string) => void,
     onAdjustToggle: () => void,
+    lockedByHost = false,
   ) {
     return (
       <div>
-        {/* Adjust Strokes toggle */}
-        <div className="skins-adjust-toggle" onClick={onAdjustToggle}>
-          <span>Adjust Strokes</span>
-          <div className={`slider-track ${isAdjusting ? 'active' : ''}`}>
-            <div className="slider-thumb" />
+        {/* Adjust Strokes toggle — hidden when host controls strokes */}
+        {lockedByHost ? (
+          <p className="skins-host-locked-note">Strokes are managed by the host</p>
+        ) : (
+          <div className="skins-adjust-toggle" onClick={onAdjustToggle}>
+            <span>Adjust Strokes</span>
+            <div className={`slider-track ${isAdjusting ? 'active' : ''}`}>
+              <div className="slider-thumb" />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Column headers */}
         <div className="skins-player-grid">
@@ -268,7 +273,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
               />
               <span>{p.name}</span>
               <span>{p.courseHandicap}</span>
-              {isAdjusting ? (
+              {!lockedByHost && isAdjusting ? (
                 <input
                   type="text"
                   inputMode="decimal"
@@ -277,7 +282,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                   onChange={e => onInputChange(p.id, e.target.value)}
                 />
               ) : (
-                <span>{p.courseHandicap}</span>
+                <span>{lockedByHost ? (inputs[p.id] ?? p.courseHandicap) : p.courseHandicap}</span>
               )}
             </div>
           ))}
@@ -344,6 +349,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                         editStrokeInputs,
                         (id, val) => setEditStrokeInputs(prev => ({ ...prev, [id]: val })),
                         toggleEditAdjustStrokes,
+                        !isHost && activeManualSkinsStrokes,
                       )}
                       {/* Non-host foursomes — host can edit their strokes */}
                       {isHost && otherFoursomes.map(fs => {
