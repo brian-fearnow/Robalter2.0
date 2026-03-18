@@ -83,7 +83,7 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
         {scorecardPlayers.map(p => {
           const displayStrokes = (strokeView === 'skins' && skinsState.roundId)
             ? (skinsState.useManualSkinsStrokes ? (skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap)
-            : (gameMode === 'sixes' || gameMode === 'wheel')
+            : (gameMode === 'sixes' || gameMode === 'wheel') && settings.strokeAllocation === 'divided'
               ? computeStrokesPerSixHoles(p)
               : (settings.useManualStrokes ? p.manualRelativeStrokes : p.courseHandicap - baselineCH);
           const bookedCount = gameMode === 'book-it' ? (bookedHoles[p.id] || []).length : 0;
