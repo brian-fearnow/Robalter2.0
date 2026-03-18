@@ -124,24 +124,27 @@ export function SetupTab({ appState, skinsState }: SetupTabProps) {
       <div className="card course-card">
         <h3><MapPin size={14} /> ACTIVE COURSE <button className="icon-btn info-btn" onClick={() => setInfoModal('course')} title="Course button info"><Info size={13} /></button></h3>
         <div className="course-selector-row">
-          <select value={selectedCourseId} onChange={e => setSelectedCourseId(e.target.value)}>
+          <select value={selectedCourseId} onChange={e => setSelectedCourseId(e.target.value)} disabled={!!(skinsState.roundId && !skinsState.isHost)}>
             {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
-          <button className="icon-btn edit-course" onClick={() => editCourse(selectedCourse)} title="Edit Course">
+          <button className="icon-btn edit-course" onClick={() => editCourse(selectedCourse)} title="Edit Course" disabled={!!(skinsState.roundId && !skinsState.isHost)}>
             <Edit2 size={14} />
           </button>
-          <button className="icon-btn add-course" onClick={startNewCourse} title="Add Course">
+          <button className="icon-btn add-course" onClick={startNewCourse} title="Add Course" disabled={!!(skinsState.roundId && !skinsState.isHost)}>
             <Plus size={14} />
           </button>
-          <button className="icon-btn ghin-import-course" onClick={() => setGhinCourseModalOpen(true)} title="Import course from GHIN">
+          <button className="icon-btn ghin-import-course" onClick={() => setGhinCourseModalOpen(true)} title="Import course from GHIN" disabled={!!(skinsState.roundId && !skinsState.isHost)}>
             <Download size={14} />
           </button>
           {!PERMANENT_COURSE_IDS.includes(selectedCourseId as typeof PERMANENT_COURSE_IDS[number]) && (
-            <button className="icon-btn remove-course" onClick={() => deleteCourse(selectedCourseId)} title="Remove Course">
+            <button className="icon-btn remove-course" onClick={() => deleteCourse(selectedCourseId)} title="Remove Course" disabled={!!(skinsState.roundId && !skinsState.isHost)}>
               <Trash2 size={14} />
             </button>
           )}
         </div>
+        {skinsState.roundId && !skinsState.isHost && (
+          <div className="course-locked-note">Course is locked while a skins game is active. Leave the skins game to change it.</div>
+        )}
       </div>
 
       {/* Players Card */}
