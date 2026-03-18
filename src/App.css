@@ -1021,6 +1021,19 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .skins-player-row--summary span:nth-child(3) { text-align: center; }
 .skins-player-header--summary span:first-child,
 .skins-player-row--summary span:first-child { text-align: left; }
+/* Divider row inside the summary grid spanning all columns */
+.skins-group-divider-row {
+  grid-column: 1 / -1;
+  font-size: 0.65rem; color: #999; text-transform: uppercase;
+  letter-spacing: 0.05em; font-family: sans-serif;
+  padding: 5px 0 2px; border-top: 1px solid #eee; margin-top: 2px;
+}
+/* Section label above a non-host group in the edit form */
+.skins-group-section-label {
+  font-size: 0.65rem; color: #999; text-transform: uppercase;
+  letter-spacing: 0.05em; font-family: sans-serif;
+  margin-bottom: 4px;
+}
 
 /* Strokes-per-N label in the scorecard hole-column header */
 .h-cell--strokes-label {

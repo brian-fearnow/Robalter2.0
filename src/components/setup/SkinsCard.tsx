@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { ChevronDown, ChevronUp, Trash2, LogOut, Settings, X } from 'lucide-react';
 import type { Player, Course } from '../../types';
 import type { SkinsRoundState } from '../../hooks/useSkinsRound';
@@ -49,6 +49,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
   const [editAdjustStrokes, setEditAdjustStrokes] = useState(false);
   const [editStrokeInputs, setEditStrokeInputs] = useState<Record<string, string>>({});
   const [editSelectedIds, setEditSelectedIds] = useState<string[]>([]);
+  const [editOtherStrokeInputs, setEditOtherStrokeInputs] = useState<Record<string, Record<string, string>>>({});
 
   const {
     roundId, foursomeId, round,
@@ -56,7 +57,7 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
     useManualSkinsStrokes: activeManualSkinsStrokes,
     myPlayers: skinsPlayers,
     foursomes, isHost, recentRooms, status, error,
-    createRound, joinRound, leaveRound, deleteRound, updateSettings, updateMyGroupPlayers, removeGroup,
+    createRound, joinRound, leaveRound, deleteRound, updateSettings, updateMyGroupPlayers, removeGroup, updateOtherFoursomePlayers,
   } = skinsState;
 
   // Build a lookup from the skins-specific player list (has correct manualRelativeStrokes)
@@ -167,6 +168,15 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
       ? Object.fromEntries(namedPlayers.map(p => [p.id, String(skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap)]))
       : defaultStrokeInputs(namedPlayers);
     setEditStrokeInputs(strokeInputsToUse);
+    // Seed stroke inputs for non-host foursomes
+    const otherInputs: Record<string, Record<string, string>> = {};
+    otherFoursomes.forEach(fs => {
+      const fsPlayers = (fs.players ?? []).filter(p => p.name);
+      otherInputs[fs.id] = Object.fromEntries(
+        fsPlayers.map(p => [p.id, String(activeManualSkinsStrokes ? (p.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap)])
+      );
+    });
+    setEditOtherStrokeInputs(otherInputs);
     setSubView('edit');
   };
 
@@ -190,6 +200,18 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
     if (isHost) {
       const playersToSend = editAdjustStrokes ? applyStrokeInputs(players, editStrokeInputs) : players;
       await updateSettings(parseFloat(editBuyInInput) || 0, editHalfStrokes, editAdjustStrokes && editManualSkinsStrokes, playersToSend);
+      // Update stroke values for non-host foursomes if adjust strokes is on
+      if (editAdjustStrokes) {
+        for (const fs of otherFoursomes) {
+          const fsPlayers = (fs.players ?? []).filter(p => p.name);
+          if (fsPlayers.length === 0) continue;
+          const updated = fsPlayers.map(p => ({
+            ...p,
+            manualRelativeStrokes: parseFloat(editOtherStrokeInputs[fs.id]?.[p.id] ?? '') || 0,
+          }));
+          await updateOtherFoursomePlayers(fs.id, updated);
+        }
+      }
     } else {
       const playersToSend = editAdjustStrokes ? applyStrokeInputs(players, editStrokeInputs) : players;
       await updateMyGroupPlayers(playersToSend);
@@ -323,6 +345,43 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                         (id, val) => setEditStrokeInputs(prev => ({ ...prev, [id]: val })),
                         toggleEditAdjustStrokes,
                       )}
+                      {/* Non-host foursomes — host can edit their strokes */}
+                      {isHost && otherFoursomes.map(fs => {
+                        const fsPlayers = (fs.players ?? []).filter(p => p.name);
+                        if (fsPlayers.length === 0) return null;
+                        return (
+                          <div key={fs.id} style={{ marginTop: '0.75rem' }}>
+                            <div className="skins-group-section-label">{fs.label}</div>
+                            <div className="skins-player-grid">
+                              <div className="skins-player-header skins-player-header--summary">
+                                <span>Player</span>
+                                <span>Course HDCP</span>
+                                <span>Strokes</span>
+                              </div>
+                              {fsPlayers.map(p => (
+                                <div key={p.id} className="skins-player-row skins-player-row--summary">
+                                  <span>{p.name}</span>
+                                  <span>{p.courseHandicap}</span>
+                                  {editAdjustStrokes ? (
+                                    <input
+                                      type="text"
+                                      inputMode="decimal"
+                                      className="manual-stroke-input"
+                                      value={editOtherStrokeInputs[fs.id]?.[p.id] ?? String(p.courseHandicap)}
+                                      onChange={e => setEditOtherStrokeInputs(prev => ({
+                                        ...prev,
+                                        [fs.id]: { ...(prev[fs.id] ?? {}), [p.id]: e.target.value },
+                                      }))}
+                                    />
+                                  ) : (
+                                    <span>{p.courseHandicap}</span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -367,13 +426,41 @@ export function SkinsCard({ skinsState, activePlayers, onCourseChange }: SkinsCa
                           <span>Course HDCP</span>
                           <span>Strokes</span>
                         </div>
-                        {skinsPlayers.filter(p => p.name).map(p => (
-                          <div key={p.id} className="skins-player-row skins-player-row--summary">
-                            <span>{p.name}</span>
-                            <span>{p.courseHandicap}</span>
-                            <span>{activeManualSkinsStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
-                          </div>
-                        ))}
+                        {isHost ? (
+                          foursomes.map(fs => {
+                            const fsPlayers = (fs.players ?? []).filter(p => p.name);
+                            if (fsPlayers.length === 0) return null;
+                            return (
+                              <Fragment key={fs.id}>
+                                {foursomes.length > 1 && (
+                                  <div className="skins-group-divider-row">
+                                    {fs.id === foursomeId ? 'Your Group' : fs.label}
+                                  </div>
+                                )}
+                                {fsPlayers.map(p => {
+                                  const strokes = activeManualSkinsStrokes
+                                    ? (p.manualRelativeStrokes ?? p.courseHandicap)
+                                    : p.courseHandicap;
+                                  return (
+                                    <div key={`${fs.id}:${p.id}`} className="skins-player-row skins-player-row--summary">
+                                      <span>{p.name}</span>
+                                      <span>{p.courseHandicap}</span>
+                                      <span>{strokes}</span>
+                                    </div>
+                                  );
+                                })}
+                              </Fragment>
+                            );
+                          })
+                        ) : (
+                          skinsPlayers.filter(p => p.name).map(p => (
+                            <div key={p.id} className="skins-player-row skins-player-row--summary">
+                              <span>{p.name}</span>
+                              <span>{p.courseHandicap}</span>
+                              <span>{activeManualSkinsStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
                   )}

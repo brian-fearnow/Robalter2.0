@@ -260,6 +260,11 @@ export function useSkinsRound(course: Course) {
     await fbRemoveFoursome(roundId, targetFoursomeId);
   }, [roundId]);
 
+  const updateOtherFoursomePlayers = useCallback(async (targetFoursomeId: string, players: Player[]) => {
+    if (!roundId) return;
+    await updateFoursomePlayers(roundId, targetFoursomeId, players);
+  }, [roundId]);
+
   const completeRound = useCallback(async () => {
     if (roundId) await setRoundStatus(roundId, 'completed');
   }, [roundId]);
@@ -319,6 +324,7 @@ export function useSkinsRound(course: Course) {
     updateSettings,
     updateMyGroupPlayers,
     removeGroup,
+    updateOtherFoursomePlayers,
     completeRound,
     leaveRound,
     deleteRound,
