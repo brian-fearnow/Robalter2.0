@@ -85,7 +85,9 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
             ? (skinsState.useManualSkinsStrokes ? (skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap)
             : (gameMode === 'sixes' || gameMode === 'wheel') && settings.strokeAllocation === 'divided'
               ? computeStrokesPerSixHoles(p)
-              : (settings.useManualStrokes ? p.manualRelativeStrokes : p.courseHandicap - baselineCH);
+              : gameMode === 'independent'
+                ? p.courseHandicap
+                : (settings.useManualStrokes ? p.manualRelativeStrokes : p.courseHandicap - baselineCH);
           const bookedCount = gameMode === 'book-it' ? (bookedHoles[p.id] || []).length : 0;
           const holesRequired = settings.bookItHolesRequired;
           return (
