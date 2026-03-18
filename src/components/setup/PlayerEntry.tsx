@@ -67,7 +67,10 @@ export function PlayerEntry({
             defaultValue=""
           >
             <option value="" disabled>Load Partner...</option>
-            {partners.map(pt => (
+            {[...partners].sort((a, b) => {
+              const key = (name: string) => { const p = name.trim().split(/\s+/); return p.length > 1 ? p[p.length - 1] : p[0]; };
+              return key(a.name).localeCompare(key(b.name));
+            }).map(pt => (
               <option
                 key={pt.name}
                 value={pt.name}
