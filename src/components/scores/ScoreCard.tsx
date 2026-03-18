@@ -75,7 +75,7 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
     <div className="scorecard-view" style={{ '--player-count': scorecardPlayers.length || 1 } as React.CSSProperties}>
       {/* Fixed header */}
       <div className="scorecard-header-fixed">
-        <div className="h-cell">Hole</div>
+        <div className="h-cell"></div>
         {scorecardPlayers.map(p => {
           const displayStrokes = (strokeView === 'skins' && skinsState.roundId)
             ? (skinsState.useManualSkinsStrokes ? (skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap)
