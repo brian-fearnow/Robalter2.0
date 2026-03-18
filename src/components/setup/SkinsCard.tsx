@@ -331,19 +331,20 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                   )}
 
                   <div style={{ marginTop: '0.5rem' }}>
-                  <div className="skins-player-grid">
-                    <div className="skins-player-header skins-player-header--summary">
-                      <span>Player</span>
-                      <span>Course HDCP</span>
-                      <span>Strokes</span>
-                    </div>
-                    {namedPlayers.map(p => (
-                      <div key={p.id} className="skins-player-row skins-player-row--summary">
-                        <span>{p.name}</span>
-                        <span>{p.courseHandicap}</span>
-                        <span>{p.manualRelativeStrokes !== p.courseHandicap && activeManualSkinsStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
+                    <div className="skins-player-grid">
+                      <div className="skins-player-header skins-player-header--summary">
+                        <span>Player</span>
+                        <span>Course HDCP</span>
+                        <span>Strokes</span>
                       </div>
-                    ))}
+                      {namedPlayers.map(p => (
+                        <div key={p.id} className="skins-player-row skins-player-row--summary">
+                          <span>{p.name}</span>
+                          <span>{p.courseHandicap}</span>
+                          <span>{p.manualRelativeStrokes !== p.courseHandicap && activeManualSkinsStrokes ? p.manualRelativeStrokes : p.courseHandicap}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Connected groups (host can remove) */}
