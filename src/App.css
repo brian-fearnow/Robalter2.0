@@ -961,7 +961,7 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .skins-player-header,
 .skins-player-row {
   display: grid;
-  grid-template-columns: 20px 1fr 72px 52px;
+  grid-template-columns: 20px 2fr 1fr 1fr;
   align-items: center;
   gap: 4px;
   padding: 3px 0;
@@ -983,7 +983,7 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 /* Summary view (no checkbox column) */
 .skins-player-header--summary,
 .skins-player-row--summary {
-  grid-template-columns: 1fr 72px 52px;
+  grid-template-columns: 2fr 1fr 1fr;
 }
 .skins-player-header--summary span,
 .skins-player-row--summary span:nth-child(2),
