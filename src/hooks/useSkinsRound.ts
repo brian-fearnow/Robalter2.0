@@ -298,9 +298,9 @@ export function useSkinsRound(course: Course) {
     await fbRemoveFoursome(roundId, targetFoursomeId);
   }, [roundId]);
 
-  const updateOtherFoursomePlayers = useCallback(async (targetFoursomeId: string, players: Player[]) => {
+  const updateOtherFoursomePlayers = useCallback(async (targetFoursomeId: string, players: Player[], useManualStrokes?: boolean) => {
     if (!roundId) return;
-    await updateFoursomePlayers(roundId, targetFoursomeId, players);
+    await updateFoursomePlayers(roundId, targetFoursomeId, players, useManualStrokes);
   }, [roundId]);
 
   const completeRound = useCallback(async () => {
