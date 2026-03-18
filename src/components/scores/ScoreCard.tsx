@@ -85,7 +85,7 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
             ? (skinsState.useManualSkinsStrokes ? (skinsPlayerMap[p.id]?.manualRelativeStrokes ?? p.courseHandicap) : p.courseHandicap)
             : (gameMode === 'sixes' || gameMode === 'wheel') && settings.strokeAllocation === 'divided'
               ? computeStrokesPerSixHoles(p)
-              : gameMode === 'independent'
+              : (gameMode === 'independent' || gameMode === 'book-it')
                 ? p.courseHandicap
                 : (settings.useManualStrokes ? p.manualRelativeStrokes : p.courseHandicap - baselineCH);
           const bookedCount = gameMode === 'book-it' ? (bookedHoles[p.id] || []).length : 0;
@@ -93,12 +93,11 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
           return (
             <div key={p.id} className="p-cell">
               <div className="p-name">{p.name.split(' ')[0]}</div>
-              {gameMode === 'book-it' ? (
-                <div className={`p-strokes booked-count ${bookedCount >= holesRequired ? 'booked-full' : ''}`}>
-                  {bookedCount}/{holesRequired}
+              <div className="p-strokes">{displayStrokes}</div>
+              {gameMode === 'book-it' && (
+                <div className={`p-booked-count ${bookedCount >= holesRequired ? 'booked-full' : ''}`}>
+                  Booked: {bookedCount}/{holesRequired}
                 </div>
-              ) : (
-                <div className="p-strokes">{displayStrokes}</div>
               )}
             </div>
           );

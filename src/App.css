@@ -798,6 +798,8 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .book-btn:not(:disabled):hover { color: var(--mackenzie-green); }
 .booked-count { font-size: 0.65rem !important; font-weight: 700; }
 .booked-count.booked-full { color: var(--mackenzie-green) !important; }
+.p-booked-count { font-size: 0.5rem; font-family: sans-serif; color: #888; margin-top: 1px; }
+.p-booked-count.booked-full { color: var(--mackenzie-green); font-weight: 700; }
 .setting-number-input {
   width: 52px; height: 30px; text-align: center; border: 1px solid var(--border-light);
   border-radius: 6px; font-size: 0.9rem; font-weight: 700; color: var(--text-dark); background: white;
