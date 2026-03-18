@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, MapPin, Edit2, Plus, Trash2, UserCheck, ChevronDown, ChevronUp, RotateCcw, RefreshCw, Download, Info, X, Search, UserMinus, UserPlus } from 'lucide-react';
 import type { AppState } from '../../hooks/useAppState';
 import type { SkinsRoundState } from '../../hooks/useSkinsRound';
@@ -73,6 +73,25 @@ export function SetupTab({ appState, skinsState }: SetupTabProps) {
 
   const [ghinCourseModalOpen, setGhinCourseModalOpen] = useState(false);
   const [infoModal, setInfoModal] = useState<'course' | 'players' | null>(null);
+  const [ghinRefreshModalOpen, setGhinRefreshModalOpen] = useState(false);
+  const [pendingGhinRefresh, setPendingGhinRefresh] = useState(false);
+
+  // When the token becomes available after a login prompted by the refresh button, run the refresh.
+  useEffect(() => {
+    if (pendingGhinRefresh && ghinToken) {
+      partners.filter(pt => pt.ghin).forEach(pt => refreshPartnerIndex(pt));
+      setPendingGhinRefresh(false);
+    }
+  }, [ghinToken, pendingGhinRefresh, partners, refreshPartnerIndex]);
+
+  const handleUpdateGhinIndexes = () => {
+    if (!ghinToken) {
+      setPendingGhinRefresh(true);
+      setGhinRefreshModalOpen(true);
+    } else {
+      partners.filter(pt => pt.ghin).forEach(pt => refreshPartnerIndex(pt));
+    }
+  };
 
   // Track GHIN numbers for players looked up this session, so we can attach them when saving a partner
   const [pendingGhin, setPendingGhin] = useState<Record<string, string>>({});
@@ -156,11 +175,11 @@ export function SetupTab({ appState, skinsState }: SetupTabProps) {
           </div>
           {visibleSections.partners && (
             <>
-              {ghinToken && partners.some(pt => pt.ghin) && (
+              {partners.some(pt => pt.ghin) && (
                 <div className="partners-refresh-row">
                   <button
                     className="partners-update-all-btn"
-                    onClick={() => partners.filter(pt => pt.ghin).forEach(pt => refreshPartnerIndex(pt))}
+                    onClick={handleUpdateGhinIndexes}
                     disabled={partnerRefreshing.size > 0}
                   >
                     <RefreshCw size={12} className={partnerRefreshing.size > 0 ? 'spinning' : ''} />
@@ -321,6 +340,16 @@ export function SetupTab({ appState, skinsState }: SetupTabProps) {
           onClose={() => setGhinLookupPlayerId(null)}
           initialFirstName={ghinInitialName.first}
           initialLastName={ghinInitialName.last}
+        />
+      )}
+
+      {ghinRefreshModalOpen && (
+        <GhinLookupModal
+          ghinToken={ghinToken}
+          onSaveToken={(token) => { saveGhinToken(token); setGhinRefreshModalOpen(false); }}
+          onClearToken={clearGhinToken}
+          onSelectGolfer={() => setGhinRefreshModalOpen(false)}
+          onClose={() => { setGhinRefreshModalOpen(false); setPendingGhinRefresh(false); }}
         />
       )}
     </div>

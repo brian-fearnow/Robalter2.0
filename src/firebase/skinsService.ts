@@ -35,6 +35,7 @@ export interface CreateRoundParams {
   courseName: string;
   buyIn: number;
   useHalfStrokes: boolean;
+  useManualSkinsStrokes: boolean;
   hostPlayers: Player[];
 }
 
@@ -66,6 +67,7 @@ export async function createRound(
     courseName: params.courseName,
     buyIn: params.buyIn,
     useHalfStrokes: params.useHalfStrokes,
+    useManualSkinsStrokes: params.useManualSkinsStrokes,
     createdAt: Date.now(),
     status: 'active',
   };
@@ -163,7 +165,7 @@ export async function setRoundStatus(
 
 export async function updateRoundMetadata(
   roundId: string,
-  updates: Partial<Pick<SkinsRoundMetadata, 'buyIn' | 'useHalfStrokes'>>
+  updates: Partial<Pick<SkinsRoundMetadata, 'buyIn' | 'useHalfStrokes' | 'useManualSkinsStrokes'>>
 ): Promise<void> {
   await update(ref(db, `rounds/${roundId}/metadata`), updates);
 }

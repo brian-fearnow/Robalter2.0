@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ChevronDown, ChevronUp, Trash2, LogOut, Settings, X } from 'lucide-react';
 import type { Player } from '../../types';
 import type { SkinsRoundState } from '../../hooks/useSkinsRound';
-
 interface SkinsCardProps {
   skinsState: SkinsRoundState;
   activePlayers: Player[];
@@ -10,23 +9,48 @@ interface SkinsCardProps {
 
 type SubView = null | 'create' | 'join' | 'edit';
 
+/**
+ * Default stroke inputs for the Adjust Strokes grid.
+ * For skins (baseline = 0) a player's total strokes = courseHandicap.
+ * The value stored is the pre-half-stroke relative handicap (matching
+ * how StrokeSummary stores manualRelativeStrokes).
+ */
+function defaultStrokeInputs(players: Player[]): Record<string, string> {
+  return Object.fromEntries(players.filter(p => p.name).map(p => [p.id, String(p.courseHandicap)]));
+}
+
+/** Build player array with manualRelativeStrokes set from the stroke inputs map */
+function applyStrokeInputs(players: Player[], strokeInputs: Record<string, string>): Player[] {
+  return players.map(p => ({
+    ...p,
+    manualRelativeStrokes: parseFloat(strokeInputs[p.id] ?? '') || 0,
+  }));
+}
+
 export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
   const [expanded, setExpanded] = useState(true);
   const [subView, setSubView] = useState<SubView>(null);
-  const [buyIn, setBuyIn] = useState(10);
+  const [buyInInput, setBuyInInput] = useState('50');
   const [useHalfStrokes, setUseHalfStrokes] = useState(false);
+  const [useManualSkinsStrokes, setUseManualSkinsStrokes] = useState(false);
+  const [adjustStrokes, setAdjustStrokes] = useState(false);
+  const [strokeInputs, setStrokeInputs] = useState<Record<string, string>>({});
   const [joinCode, setJoinCode] = useState('');
 
   const namedPlayers = activePlayers.filter(p => p.name);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>(namedPlayers.map(p => p.id));
 
   // Edit-mode local state (mirrors active round values when opened)
-  const [editBuyIn, setEditBuyIn] = useState(0);
+  const [editBuyInInput, setEditBuyInInput] = useState('0');
   const [editHalfStrokes, setEditHalfStrokes] = useState(false);
+  const [editManualSkinsStrokes, setEditManualSkinsStrokes] = useState(false);
+  const [editAdjustStrokes, setEditAdjustStrokes] = useState(false);
+  const [editStrokeInputs, setEditStrokeInputs] = useState<Record<string, string>>({});
   const [editSelectedIds, setEditSelectedIds] = useState<string[]>([]);
 
   const {
     roundId, roomCode, buyIn: activeBuyIn, useHalfStrokes: activeHalfStrokes,
+    useManualSkinsStrokes: activeManualSkinsStrokes,
     foursomes, isHost, recentRooms, status, error,
     createRound, joinRound, leaveRound, deleteRound, updateSettings, updateMyGroupPlayers, removeGroup,
   } = skinsState;
@@ -38,18 +62,61 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
   const effectiveSelectedIds = selectedPlayerIds.filter(id => currentNamedIds.includes(id));
   const selectedPlayers = activePlayers.filter(p => effectiveSelectedIds.includes(p.id));
 
+  // --- Create ---
+
   const handleCreate = async () => {
     if (selectedPlayers.length === 0) return;
-    await createRound(buyIn, useHalfStrokes, selectedPlayers);
+    const playersToSend = adjustStrokes
+      ? applyStrokeInputs(selectedPlayers, strokeInputs)
+      : selectedPlayers;
+    await createRound(parseFloat(buyInInput) || 0, useHalfStrokes, adjustStrokes && useManualSkinsStrokes, playersToSend);
     setSubView(null);
   };
 
+  const openCreate = () => {
+    setSelectedPlayerIds(currentNamedIds);
+    setUseHalfStrokes(false);
+    setUseManualSkinsStrokes(false);
+    setAdjustStrokes(false);
+    setStrokeInputs(defaultStrokeInputs(namedPlayers));
+    setSubView('create');
+  };
+
+  const toggleAdjustStrokes = () => {
+    const next = !adjustStrokes;
+    setAdjustStrokes(next);
+    setUseManualSkinsStrokes(next);
+    if (next) {
+      setStrokeInputs(defaultStrokeInputs(selectedPlayers));
+    }
+  };
+
+  // Half-strokes change: no need to recalculate stroke inputs
+  // (inputs store pre-half-stroke relative handicap, matching StrokeSummary)
+  const handleHalfStrokesChange = (checked: boolean) => {
+    setUseHalfStrokes(checked);
+  };
+
+  // --- Join ---
+
   const handleJoin = async (code = joinCode) => {
     if (!code.trim() || selectedPlayers.length === 0) return;
-    await joinRound(code.trim(), selectedPlayers);
+    const playersToSend = adjustStrokes
+      ? applyStrokeInputs(selectedPlayers, strokeInputs)
+      : selectedPlayers;
+    await joinRound(code.trim(), playersToSend);
     setSubView(null);
     setJoinCode('');
   };
+
+  const openJoin = () => {
+    setSelectedPlayerIds(currentNamedIds);
+    setAdjustStrokes(false);
+    setStrokeInputs(defaultStrokeInputs(namedPlayers));
+    setSubView('join');
+  };
+
+  // --- Leave / Delete ---
 
   const handleLeave = () => {
     if (window.confirm(`Leave skins game "${roomCode}"? Other foursomes will still be able to see results.`)) {
@@ -65,19 +132,40 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
     }
   };
 
+  // --- Edit ---
+
   const openEdit = () => {
-    setEditBuyIn(activeBuyIn);
+    setEditBuyInInput(String(activeBuyIn));
     setEditHalfStrokes(activeHalfStrokes);
+    setEditManualSkinsStrokes(activeManualSkinsStrokes);
+    setEditAdjustStrokes(activeManualSkinsStrokes);
     setEditSelectedIds(currentNamedIds);
+    setEditStrokeInputs(defaultStrokeInputs(namedPlayers));
     setSubView('edit');
+  };
+
+  const toggleEditAdjustStrokes = () => {
+    const next = !editAdjustStrokes;
+    setEditAdjustStrokes(next);
+    setEditManualSkinsStrokes(next);
+    if (next) {
+      const editPlayers = activePlayers.filter(p => editSelectedIds.includes(p.id));
+      setEditStrokeInputs(defaultStrokeInputs(editPlayers));
+    }
+  };
+
+  const handleEditHalfStrokesChange = (checked: boolean) => {
+    setEditHalfStrokes(checked);
   };
 
   const handleSaveEdit = async () => {
     const players = activePlayers.filter(p => editSelectedIds.includes(p.id));
     if (isHost) {
-      await updateSettings(editBuyIn, editHalfStrokes, players);
+      const playersToSend = editAdjustStrokes ? applyStrokeInputs(players, editStrokeInputs) : players;
+      await updateSettings(parseFloat(editBuyInInput) || 0, editHalfStrokes, editAdjustStrokes && editManualSkinsStrokes, playersToSend);
     } else {
-      await updateMyGroupPlayers(players);
+      const playersToSend = editAdjustStrokes ? applyStrokeInputs(players, editStrokeInputs) : players;
+      await updateMyGroupPlayers(playersToSend);
     }
     setSubView(null);
   };
@@ -86,23 +174,68 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
     setEditSelectedIds(prev => checked ? [...prev, id] : prev.filter(x => x !== id));
   };
 
-  const openCreate = () => {
-    setSelectedPlayerIds(currentNamedIds);
-    setUseHalfStrokes(false);
-    setSubView('create');
-  };
-
-  const openJoin = () => {
-    setSelectedPlayerIds(currentNamedIds);
-    setSubView('join');
-  };
-
   const togglePlayer = (id: string, checked: boolean) => {
     setSelectedPlayerIds(prev => checked ? [...prev, id] : prev.filter(x => x !== id));
   };
 
   // Non-host foursomes (host can remove these)
   const otherFoursomes = isHost ? foursomes.filter(fs => fs.id !== foursomes[0]?.id) : [];
+
+  // --- Player grid renderer ---
+
+  function renderPlayerGrid(
+    players: Player[],
+    checkedIds: string[],
+    onToggle: (id: string, checked: boolean) => void,
+    isAdjusting: boolean,
+    inputs: Record<string, string>,
+    onInputChange: (id: string, val: string) => void,
+    onAdjustToggle: () => void,
+  ) {
+    return (
+      <div>
+        {/* Adjust Strokes toggle */}
+        <div className="skins-adjust-toggle" onClick={onAdjustToggle}>
+          <span>Adjust Strokes</span>
+          <div className={`slider-track ${isAdjusting ? 'active' : ''}`}>
+            <div className="slider-thumb" />
+          </div>
+        </div>
+
+        {/* Column headers */}
+        <div className="skins-player-grid">
+          <div className="skins-player-header">
+            <span></span>
+            <span>Player</span>
+            <span>CH</span>
+            <span>Strokes</span>
+          </div>
+          {players.map(p => (
+            <div key={p.id} className="skins-player-row">
+              <input
+                type="checkbox"
+                checked={checkedIds.includes(p.id)}
+                onChange={e => onToggle(p.id, e.target.checked)}
+              />
+              <span>{p.name}</span>
+              <span>{p.courseHandicap}</span>
+              {isAdjusting ? (
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  className="manual-stroke-input"
+                  value={inputs[p.id] ?? String(p.courseHandicap)}
+                  onChange={e => onInputChange(p.id, e.target.value)}
+                />
+              ) : (
+                <span>{p.courseHandicap}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="card independent-matches-card">
@@ -132,10 +265,10 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                           <input
                             type="number"
                             inputMode="decimal"
-                            value={editBuyIn}
+                            value={editBuyInInput}
                             min={0}
                             step={1}
-                            onChange={e => setEditBuyIn(parseFloat(e.target.value) || 0)}
+                            onChange={e => setEditBuyInInput(e.target.value)}
                           />
                         </div>
                       </div>
@@ -146,7 +279,7 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                           <input
                             type="checkbox"
                             checked={editHalfStrokes}
-                            onChange={e => setEditHalfStrokes(e.target.checked)}
+                            onChange={e => handleEditHalfStrokesChange(e.target.checked)}
                           />
                           Half strokes
                         </label>
@@ -156,18 +289,16 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
 
                   <div style={{ marginBottom: '0.75rem' }}>
                     <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'sans-serif' }}>Your Players</span>
-                    <div style={{ marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                      {namedPlayers.map(p => (
-                        <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'sans-serif', fontSize: '0.85rem', cursor: 'pointer' }}>
-                          <input
-                            type="checkbox"
-                            checked={editSelectedIds.includes(p.id)}
-                            onChange={e => toggleEditPlayer(p.id, e.target.checked)}
-                          />
-                          {p.name}
-                          <span style={{ color: '#888', fontSize: '0.75rem' }}>CH {p.courseHandicap}</span>
-                        </label>
-                      ))}
+                    <div style={{ marginTop: '0.35rem' }}>
+                      {renderPlayerGrid(
+                        namedPlayers,
+                        editSelectedIds,
+                        toggleEditPlayer,
+                        editAdjustStrokes,
+                        editStrokeInputs,
+                        (id, val) => setEditStrokeInputs(prev => ({ ...prev, [id]: val })),
+                        toggleEditAdjustStrokes,
+                      )}
                     </div>
                   </div>
 
@@ -191,7 +322,7 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                   </div>
                   <div className="res-row">
                     <span>Strokes</span>
-                    <strong>{activeHalfStrokes ? 'Half strokes' : 'Full strokes'}</strong>
+                    <strong>{activeHalfStrokes ? 'Half strokes' : 'Full strokes'}{activeManualSkinsStrokes ? ' (manual)' : ''}</strong>
                   </div>
                   {foursomes.length > 1 && (
                     <div className="res-row">
@@ -285,10 +416,10 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                       <input
                         type="number"
                         inputMode="decimal"
-                        value={buyIn}
+                        value={buyInInput}
                         min={0}
                         step={1}
-                        onChange={e => setBuyIn(parseFloat(e.target.value) || 0)}
+                        onChange={e => setBuyInInput(e.target.value)}
                       />
                     </div>
                   </div>
@@ -299,7 +430,7 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
                       <input
                         type="checkbox"
                         checked={useHalfStrokes}
-                        onChange={e => setUseHalfStrokes(e.target.checked)}
+                        onChange={e => handleHalfStrokesChange(e.target.checked)}
                       />
                       Half strokes
                     </label>
@@ -307,20 +438,19 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
 
                   <div style={{ marginBottom: '0.5rem' }}>
                     <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'sans-serif' }}>Participating Players</span>
-                    <div style={{ marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                      {namedPlayers.map(p => (
-                        <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'sans-serif', fontSize: '0.85rem', cursor: 'pointer' }}>
-                          <input
-                            type="checkbox"
-                            checked={effectiveSelectedIds.includes(p.id)}
-                            onChange={e => togglePlayer(p.id, e.target.checked)}
-                          />
-                          {p.name}
-                          <span style={{ color: '#888', fontSize: '0.75rem' }}>CH {p.courseHandicap}</span>
-                        </label>
-                      ))}
+                    <div style={{ marginTop: '0.35rem' }}>
+                      {renderPlayerGrid(
+                        namedPlayers,
+                        effectiveSelectedIds,
+                        togglePlayer,
+                        adjustStrokes,
+                        strokeInputs,
+                        (id, val) => setStrokeInputs(prev => ({ ...prev, [id]: val })),
+                        toggleAdjustStrokes,
+                      )}
                     </div>
                   </div>
+
                   {error && <p style={{ color: '#c0392b', fontSize: '0.8rem', fontFamily: 'sans-serif', margin: '4px 0' }}>{error}</p>}
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                     <button className="primary-btn" onClick={handleCreate} disabled={status === 'connecting' || selectedPlayers.length === 0} style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
@@ -360,18 +490,16 @@ export function SkinsCard({ skinsState, activePlayers }: SkinsCardProps) {
 
                   <div style={{ marginBottom: '0.75rem' }}>
                     <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'sans-serif' }}>Participating Players</span>
-                    <div style={{ marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                      {namedPlayers.map(p => (
-                        <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'sans-serif', fontSize: '0.85rem', cursor: 'pointer' }}>
-                          <input
-                            type="checkbox"
-                            checked={effectiveSelectedIds.includes(p.id)}
-                            onChange={e => togglePlayer(p.id, e.target.checked)}
-                          />
-                          {p.name}
-                          <span style={{ color: '#888', fontSize: '0.75rem' }}>CH {p.courseHandicap}</span>
-                        </label>
-                      ))}
+                    <div style={{ marginTop: '0.35rem' }}>
+                      {renderPlayerGrid(
+                        namedPlayers,
+                        effectiveSelectedIds,
+                        togglePlayer,
+                        adjustStrokes,
+                        strokeInputs,
+                        (id, val) => setStrokeInputs(prev => ({ ...prev, [id]: val })),
+                        toggleAdjustStrokes,
+                      )}
                     </div>
                   </div>
 

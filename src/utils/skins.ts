@@ -37,19 +37,13 @@ function getSkinsNetScore(
   courseHoles: Hole[],
   scores: Score | undefined,
   useHalfStrokes: boolean,
+  useManualStrokes: boolean,
 ): number | null {
   if (!scores) return null;
   const gross = scores[playerId]?.[holeNumber];
   if (!gross) return null;
-  const rawStrokes = getStrokesForHole(
-    playerId,
-    holeNumber,
-    allPlayersInFoursome,
-    courseHoles,
-    SKINS_SETTINGS,
-    'skins',
-    0,
-  );
+  const settings = useManualStrokes ? { ...SKINS_SETTINGS, useManualStrokes: true } : SKINS_SETTINGS;
+  const rawStrokes = getStrokesForHole(playerId, holeNumber, allPlayersInFoursome, courseHoles, settings, 'skins', 0);
   const strokes = useHalfStrokes ? rawStrokes * 0.5 : rawStrokes;
   return gross - strokes;
 }
@@ -61,8 +55,10 @@ export function getSkinsStrokesForHole(
   players: Player[],
   courseHoles: Hole[],
   useHalfStrokes: boolean,
+  useManualStrokes = false,
 ): number {
-  const rawStrokes = getStrokesForHole(playerId, holeNumber, players, courseHoles, SKINS_SETTINGS, 'skins', 0);
+  const settings = useManualStrokes ? { ...SKINS_SETTINGS, useManualStrokes: true } : SKINS_SETTINGS;
+  const rawStrokes = getStrokesForHole(playerId, holeNumber, players, courseHoles, settings, 'skins', 0);
   return useHalfStrokes ? rawStrokes * 0.5 : rawStrokes;
 }
 
@@ -71,6 +67,7 @@ export function calculateSkinsResults(
   courseHoles: Hole[],
   buyIn: number,
   useHalfStrokes = false,
+  useManualSkinsStrokes = false,
 ): SkinsResult {
   // Each entry carries a globally unique compound key to prevent collisions when
   // multiple foursomes share the same local player IDs ('1', '2', '3', etc.).
@@ -101,7 +98,7 @@ export function calculateSkinsResults(
     // Net scores compared across ALL foursomes — winner is lowest net among all participants.
     const netScores: Record<string, number> = {};
     for (const { uniqueId, player, allPlayersInFoursome, scores } of flatPlayers) {
-      const net = getSkinsNetScore(player.id, hole.number, allPlayersInFoursome, courseHoles, scores, useHalfStrokes);
+      const net = getSkinsNetScore(player.id, hole.number, allPlayersInFoursome, courseHoles, scores, useHalfStrokes, useManualSkinsStrokes);
       if (net !== null) netScores[uniqueId] = net;
     }
 

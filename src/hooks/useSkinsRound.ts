@@ -131,7 +131,7 @@ export function useSkinsRound(course: Course) {
 
   // --- Actions ---
 
-  const createRound = useCallback(async (buyIn: number, useHalfStrokes: boolean, players: Player[]): Promise<string> => {
+  const createRound = useCallback(async (buyIn: number, useHalfStrokes: boolean, useManualSkinsStrokes: boolean, players: Player[]): Promise<string> => {
     setStatus('connecting');
     setError(null);
     try {
@@ -140,6 +140,7 @@ export function useSkinsRound(course: Course) {
         courseName: course.name,
         buyIn,
         useHalfStrokes,
+        useManualSkinsStrokes,
         hostPlayers: players,
       });
       setRoundId(result.roundId);
@@ -203,9 +204,9 @@ export function useSkinsRound(course: Course) {
   }, [roundId, foursomeId]);
 
   // Host-only: updates buy-in, stroke mode, and the host's own player list.
-  const updateSettings = useCallback(async (buyIn: number, useHalfStrokes: boolean, players: Player[]) => {
+  const updateSettings = useCallback(async (buyIn: number, useHalfStrokes: boolean, useManualSkinsStrokes: boolean, players: Player[]) => {
     if (!roundId) return;
-    await updateRoundMetadata(roundId, { buyIn, useHalfStrokes });
+    await updateRoundMetadata(roundId, { buyIn, useHalfStrokes, useManualSkinsStrokes });
     if (foursomeId) {
       setMyPlayers(players);
       await updateFoursomePlayers(roundId, foursomeId, players);
@@ -274,6 +275,7 @@ export function useSkinsRound(course: Course) {
     roomCode,
     buyIn: round?.metadata.buyIn ?? 0,
     useHalfStrokes: round?.metadata.useHalfStrokes ?? false,
+    useManualSkinsStrokes: round?.metadata.useManualSkinsStrokes ?? false,
     // Actions
     createRound,
     joinRound,

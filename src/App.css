@@ -944,6 +944,42 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .skins-hole-table .winner-cell { color: var(--mackenzie-green); font-weight: 700; }
 .skins-hole-table .tie-cell { color: #bbb; font-style: italic; }
 
+/* Skins player grid (Create / Join / Edit forms) */
+.skins-adjust-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  font-family: sans-serif;
+  font-size: 0.78rem;
+  color: #555;
+  cursor: pointer;
+  user-select: none;
+}
+.skins-player-grid { font-family: sans-serif; font-size: 0.82rem; }
+.skins-player-header,
+.skins-player-row {
+  display: grid;
+  grid-template-columns: 20px 1fr 36px 52px;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 0;
+}
+.skins-player-header {
+  color: #888;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 4px;
+  margin-bottom: 2px;
+}
+.skins-player-header span:nth-child(3),
+.skins-player-header span:nth-child(4),
+.skins-player-row span:nth-child(3),
+.skins-player-row span:nth-child(4) { text-align: center; }
+.skins-player-row .manual-stroke-input { width: 44px; text-align: center; }
 
 /* Stroke-view selector on the Scores tab */
 .stroke-view-selector {
@@ -995,4 +1031,9 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
   margin-left: 4px;
   position: relative;
   top: -1px;
+}
+
+/* Green checkboxes in the Skins card */
+.independent-matches-card input[type="checkbox"] {
+  accent-color: var(--mackenzie-green);
 }

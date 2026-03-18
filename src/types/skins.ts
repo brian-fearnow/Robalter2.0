@@ -6,8 +6,9 @@ export interface SkinsRoundMetadata {
   code: string;
   courseId: string;
   courseName: string;
-  buyIn: number;              // flat entry fee per participating player
-  useHalfStrokes: boolean;    // when true, each stroke stroke is worth 0.5
+  buyIn: number;                   // flat entry fee per participating player
+  useHalfStrokes: boolean;         // when true, each stroke is worth 0.5
+  useManualSkinsStrokes: boolean;  // when true, use player.manualRelativeStrokes instead of courseHandicap
   createdAt: number;          // Unix timestamp (ms)
   status: 'waiting' | 'active' | 'completed';
 }
