@@ -993,10 +993,14 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 
 /* Strokes-per-N label in the scorecard hole-column header */
 .h-cell--strokes-label {
-  font-size: 0.65rem;
-  color: #888;
-  font-style: italic;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  font-size: 0.55rem;
+  color: var(--heritage-gold);
+  font-style: normal;
   white-space: nowrap;
+  padding-bottom: 1px;
 }
 
 /* Stroke-view selector on the Scores tab */
