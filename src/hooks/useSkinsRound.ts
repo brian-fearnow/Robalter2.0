@@ -146,6 +146,24 @@ export function useSkinsRound(course: Course) {
     if (fsPlayers.length > 0) setMyPlayers(fsPlayers);
   }, [round, foursomeId]);
 
+  // Sync manualRelativeStrokes from Firebase when the host edits non-host strokes.
+  // Only runs after myPlayers is already populated (skips initial load, handled above).
+  // Only calls setMyPlayers when values actually changed to avoid unnecessary renders.
+  useEffect(() => {
+    if (!round || !foursomeId || myPlayersRef.current.length === 0) return;
+    const fsPlayers = round.foursomes?.[foursomeId]?.players ?? [];
+    if (fsPlayers.length === 0) return;
+    const hasChanges = myPlayersRef.current.some(p => {
+      const sp = fsPlayers.find(fp => fp.id === p.id);
+      return sp && sp.manualRelativeStrokes !== p.manualRelativeStrokes;
+    });
+    if (!hasChanges) return;
+    setMyPlayers(prev => prev.map(p => {
+      const sp = fsPlayers.find(fp => fp.id === p.id);
+      return sp ? { ...p, manualRelativeStrokes: sp.manualRelativeStrokes } : p;
+    }));
+  }, [round, foursomeId]);
+
   // Pre-compute roomCode as a stable string so async callbacks don't need to
   // reach into round.metadata mid-execution (round can become null after deletion).
   const roomCode = round?.metadata.code ?? null;
