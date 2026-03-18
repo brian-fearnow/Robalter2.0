@@ -910,7 +910,7 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
   padding: 1px 6px; letter-spacing: 0.04em; vertical-align: middle; margin-left: 6px;
 }
 .skins-code-input {
-  width: 9rem; padding: 0.4rem 0.5rem; border: 1px solid var(--border-light);
+  width: 14rem; padding: 0.4rem 0.5rem; border: 1px solid var(--border-light);
   border-radius: 4px; font-size: 0.85rem; text-transform: uppercase; font-family: sans-serif;
   font-weight: 700; color: var(--mackenzie-green); letter-spacing: 0.05em;
 }
