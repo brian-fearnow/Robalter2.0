@@ -214,6 +214,10 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .reset-card { margin-top: 2rem; border: 1px solid #ffcccc; background: #fff8f8; text-align: center; }
 .reset-button { background: none; border: none; color: #cc0000; font-family: sans-serif; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 0.5rem; cursor: pointer; }
 
+.feedback-footer { margin-top: 1rem; padding-bottom: 1rem; text-align: center; }
+.feedback-link { font-size: 0.7rem; font-family: sans-serif; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: var(--mackenzie-green); text-decoration: none; opacity: 0.5; transition: opacity 0.2s; }
+.feedback-link:hover { opacity: 1; }
+
 .player-entry-row-group { display: flex; flex-direction: column; gap: 4px; }
 .icon-btn { background: none; border: none; padding: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: 0.2s; }
 .save-partner { color: var(--mackenzie-green); border: 1px solid var(--border-light); }      
