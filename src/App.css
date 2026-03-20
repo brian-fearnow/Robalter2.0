@@ -1245,3 +1245,63 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
 .junk-results-total-row .junk-col-label { font-weight: bold; }
 .junk-total-dots { font-weight: bold; color: var(--mackenzie-green); }
 .junk-results-payouts { margin-top: 8px; }
+
+/* Junk entry note */
+.junk-entry-note {
+  font-size: 0.8rem;
+  color: var(--mackenzie-green);
+  background: rgba(0, 75, 40, 0.06);
+  border: 1px solid rgba(0, 75, 40, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+/* Junk audit */
+.junk-audit-toggle {
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border-light);
+  color: #888;
+  font-size: 0.75rem;
+  font-family: sans-serif;
+  padding: 8px 0 0;
+  margin-top: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+.junk-audit-table { margin-top: 8px; }
+.junk-audit-header, .junk-audit-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-light);
+  gap: 4px;
+}
+.junk-audit-hole {
+  width: 32px;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--mackenzie-green);
+  font-family: sans-serif;
+}
+.junk-audit-player {
+  flex: 1;
+  font-size: 0.72rem;
+  color: var(--text-dark);
+  font-family: sans-serif;
+  line-height: 1.4;
+}
+.junk-audit-header .junk-audit-player {
+  font-weight: bold;
+  font-size: 0.75rem;
+}
+.junk-audit-header .junk-audit-hole {
+  font-size: 0.65rem;
+  color: #aaa;
+  font-weight: normal;
+  text-transform: uppercase;
+}

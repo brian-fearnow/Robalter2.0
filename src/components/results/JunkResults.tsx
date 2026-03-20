@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import type { AppState } from '../../hooks/useAppState';
-import { JUNK_LABELS, MANUAL_JUNK_TYPES } from '../../utils/junk';
+import { JUNK_LABELS, MANUAL_JUNK_TYPES, getBirdieEagleDots } from '../../utils/junk';
 import type { JunkType } from '../../types';
 
 interface JunkResultsProps {
@@ -7,7 +8,9 @@ interface JunkResultsProps {
 }
 
 export function JunkResults({ appState }: JunkResultsProps) {
-  const { settings, activePlayers, computeJunkResults } = appState;
+  const { settings, activePlayers, computeJunkResults, junkDots, scores, selectedCourse } = appState;
+  const [showAudit, setShowAudit] = useState(false);
+
   if (!settings.useJunk) return null;
 
   const namedPlayers = activePlayers.filter(p => p.name);
@@ -20,6 +23,15 @@ export function JunkResults({ appState }: JunkResultsProps) {
     ...MANUAL_JUNK_TYPES.filter(t => settings.junkTypes[t]),
     ...(settings.junkTypes.birdieEagle ? (['birdieEagle'] as const) : []),
   ];
+
+  // Build audit rows — only holes with any junk
+  const auditRows = Array.from({ length: 18 }, (_, i) => i + 1).filter(holeNum => {
+    const holeJunk = junkDots[holeNum] || {};
+    const hasManual = namedPlayers.some(p => (holeJunk[p.id] || []).length > 0);
+    const hasAuto = settings.junkTypes.birdieEagle &&
+      namedPlayers.some(p => getBirdieEagleDots(p.id, holeNum, scores, selectedCourse.holes) > 0);
+    return hasManual || hasAuto;
+  });
 
   return (
     <div className="card junk-results-card">
@@ -71,6 +83,51 @@ export function JunkResults({ appState }: JunkResultsProps) {
           );
         })}
       </div>
+
+      {/* Hole-by-hole audit toggle */}
+      {auditRows.length > 0 && (
+        <>
+          <button
+            className="junk-audit-toggle"
+            onClick={() => setShowAudit(v => !v)}
+          >
+            {showAudit ? '▲ Hide' : '▼ Show'} Hole-by-Hole Detail
+          </button>
+
+          {showAudit && (
+            <div className="junk-audit-table">
+              <div className="junk-audit-header">
+                <span className="junk-audit-hole">Hole</span>
+                {namedPlayers.map(p => (
+                  <span key={p.id} className="junk-audit-player">{p.name.split(' ')[0]}</span>
+                ))}
+              </div>
+              {auditRows.map(holeNum => {
+                const holeJunk = junkDots[holeNum] || {};
+                return (
+                  <div key={holeNum} className="junk-audit-row">
+                    <span className="junk-audit-hole">{holeNum}</span>
+                    {namedPlayers.map(p => {
+                      const manualTypes = (holeJunk[p.id] || []).filter(t => settings.junkTypes[t]);
+                      const birdieEagleDots = settings.junkTypes.birdieEagle
+                        ? getBirdieEagleDots(p.id, holeNum, scores, selectedCourse.holes)
+                        : 0;
+                      const parts: string[] = manualTypes.map(t => JUNK_LABELS[t]);
+                      if (birdieEagleDots === 1) parts.push('Birdie');
+                      if (birdieEagleDots === 3) parts.push('Eagle');
+                      return (
+                        <span key={p.id} className="junk-audit-player">
+                          {parts.length > 0 ? parts.join(', ') : '—'}
+                        </span>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

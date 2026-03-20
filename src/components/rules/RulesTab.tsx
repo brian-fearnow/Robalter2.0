@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Sliders, Check, X } from 'lucide-react';
 import type { AppState } from '../../hooks/useAppState';
 import { getLastPlaceHoleCount } from '../../utils/wolf';
@@ -18,6 +19,8 @@ export function RulesTab({ appState }: RulesTabProps) {
     updateIndependentMatch,
     activePlayers,
   } = appState;
+
+  const [junkDotValueInput, setJunkDotValueInput] = useState<string>(String(settings.junkDotValue));
 
   const namedWolfCount = activePlayers.filter(p => p.name).length;
   const lastPlaceHoleCount = namedWolfCount >= 3 ? getLastPlaceHoleCount(namedWolfCount) : 0;
@@ -470,14 +473,25 @@ export function RulesTab({ appState }: RulesTabProps) {
                 <input
                   type="number"
                   className="setting-number-input"
-                  min={1}
+                  min={0}
                   max={100}
-                  value={settings.junkDotValue}
+                  value={junkDotValueInput}
                   onChange={e => {
+                    setJunkDotValueInput(e.target.value);
                     const v = parseInt(e.target.value);
-                    if (v >= 1 && v <= 100) setSettings(s => ({ ...s, junkDotValue: v }));
+                    setSettings(s => ({ ...s, junkDotValue: isNaN(v) ? 0 : Math.min(v, 100) }));
+                  }}
+                  onBlur={() => {
+                    const v = parseInt(junkDotValueInput);
+                    const final = isNaN(v) ? 0 : Math.min(Math.max(v, 0), 100);
+                    setJunkDotValueInput(String(final));
+                    setSettings(s => ({ ...s, junkDotValue: final }));
                   }}
                 />
+              </div>
+
+              <div className="junk-entry-note">
+                💡 To record junk during a round, tap the hole number on the Scorecard tab to open the entry menu for that hole.
               </div>
 
               <h4 className="settings-sub-header">Junk Types</h4>
