@@ -29,7 +29,7 @@ export function JunkModal({ holeNumber, appState, onClose }: JunkModalProps) {
         ) : (
           <div
           className="junk-grid"
-          style={{ gridTemplateColumns: `1fr ${scorecardPlayers.map(() => '40px').join(' ')}` }}
+          style={{ gridTemplateColumns: `auto ${scorecardPlayers.map(() => 'minmax(52px, 1fr)').join(' ')}` }}
         >
             {/* Header row */}
             <div className="junk-grid-corner" />

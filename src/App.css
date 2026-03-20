@@ -1174,6 +1174,10 @@ body { background: var(--bg-cream); color: var(--text-dark); overflow: hidden; h
   font-weight: bold;
   text-align: center;
   color: var(--text-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 2px;
 }
 .junk-grid-row-label {
   font-size: 0.8rem;
