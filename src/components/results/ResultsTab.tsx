@@ -7,6 +7,7 @@ import { IndependentMatchResults } from './IndependentMatchResults';
 import { BookItResults } from './BookItResults';
 import { WolfResults } from './WolfResults';
 import { SkinsResultsCard } from './SkinsResultsCard';
+import { JunkResults } from './JunkResults';
 
 interface ResultsTabProps {
   appState: AppState;
@@ -58,6 +59,8 @@ export function ResultsTab({ appState, skinsState }: ResultsTabProps) {
       <IndependentMatchResults appState={appState} />
 
       <SkinsResultsCard skinsState={skinsState} />
+
+      <JunkResults appState={appState} />
     </div>
   );
 }

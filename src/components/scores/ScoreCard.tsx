@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { AppState } from '../../hooks/useAppState';
 import type { SkinsRoundState } from '../../hooks/useSkinsRound';
 import { getSkinsStrokesForHole } from '../../utils/skins';
+import { JunkModal } from './JunkModal';
 
 interface ScoreCardProps {
   appState: AppState;
@@ -22,6 +23,7 @@ type StrokeView = 'main' | 'skins';
 
 export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
   const [strokeView, setStrokeView] = useState<StrokeView>('main');
+  const [junkHole, setJunkHole] = useState<number | null>(null);
 
   const {
     selectedCourse,
@@ -72,6 +74,7 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
   );
 
   return (
+    <>
     <div className="scorecard-view" style={{ '--player-count': scorecardPlayers.length || 1 } as React.CSSProperties}>
       {/* Fixed header */}
       <div className="scorecard-header-fixed">
@@ -148,12 +151,22 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
             wolfDecision.partnerId === null ? 'wolf-hole-pair is-lone-wolf' :
             'wolf-hole-pair is-partner';
 
+          // Junk indicator: any manual junk or auto birdie/eagle on this hole
+          const holeJunk = appState.junkDots[h.number] || {};
+          const hasManualJunk = Object.values(holeJunk).some(arr => arr.length > 0);
+
           // Score cells extracted to avoid duplication
           const scoreCells = (
             <>
-              <div className="h-info">
+              <div
+                className={`h-info${appState.settings.useJunk ? ' h-info-junk' : ''}`}
+                onClick={appState.settings.useJunk ? () => setJunkHole(h.number) : undefined}
+              >
                 <strong>{h.number}</strong>
                 <span>P{h.par}/H{h.handicap}</span>
+                {appState.settings.useJunk && hasManualJunk && (
+                  <span className="junk-dot-indicator">●</span>
+                )}
               </div>
               {scorecardPlayers.map(p => {
                 const strokes = (strokeView === 'skins' && skinsState.roundId)
@@ -347,6 +360,15 @@ export function ScoreCard({ appState, skinsState }: ScoreCardProps) {
 
       </div>
     </div>
+
+    {junkHole !== null && (
+      <JunkModal
+        holeNumber={junkHole}
+        appState={appState}
+        onClose={() => setJunkHole(null)}
+      />
+    )}
+    </>
   );
 }
 

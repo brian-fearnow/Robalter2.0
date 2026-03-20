@@ -114,6 +114,16 @@ export interface GameSettings {
   useBookItSegmented: boolean;
   bookItSegmentRequired: number;
   wolfLastPlaceWolf: boolean;
+  useJunk: boolean;
+  junkDotValue: number;
+  junkTypes: {
+    greenie: boolean;
+    sandie: boolean;
+    birdieEagle: boolean;
+    chippie: boolean;
+    barkie: boolean;
+    poley: boolean;
+  };
 }
 
 // --- Audit / Result Interfaces ---
@@ -206,6 +216,9 @@ export interface SegmentFullResult {
 }
 
 export type GameMode = 'sixes' | 'wheel' | 'four-ball' | 'baseball' | 'independent' | 'book-it' | 'wolf' | 'skins';
+
+export type JunkType = 'greenie' | 'sandie' | 'chippie' | 'barkie' | 'poley';
+export type JunkDots = Record<number, Record<string, JunkType[]>>;
 
 export interface WolfDecision {
   partnerId: string | null; // null = lone wolf

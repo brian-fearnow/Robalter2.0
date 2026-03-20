@@ -28,6 +28,9 @@ const SKINS_SETTINGS: GameSettings = {
   useBookItSegmented: false,
   bookItSegmentRequired: 4,
   wolfLastPlaceWolf: false,
+  useJunk: false,
+  junkDotValue: 2,
+  junkTypes: { greenie: true, sandie: true, birdieEagle: true, chippie: true, barkie: true, poley: true },
 };
 
 function getSkinsNetScore(

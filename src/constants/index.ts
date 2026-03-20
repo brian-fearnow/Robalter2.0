@@ -116,6 +116,7 @@ export const STORAGE_KEYS = {
   BOOK_IT_BOOKED_HOLES: 'robalter_bookItBookedHoles',
   WOLF_STAKE: 'robalter_wolfStake',
   WOLF_DECISIONS: 'robalter_wolfDecisions',
+  JUNK_DOTS: 'robalter_junkDots',
 } as const;
 
 // --- Defaults ---
@@ -141,6 +142,16 @@ export const DEFAULT_SETTINGS: GameSettings = {
   useBookItSegmented: false,
   bookItSegmentRequired: 4,
   wolfLastPlaceWolf: false,
+  useJunk: false,
+  junkDotValue: 2,
+  junkTypes: {
+    greenie: true,
+    sandie: true,
+    birdieEagle: true,
+    chippie: true,
+    barkie: true,
+    poley: true,
+  },
 };
 
 export const DEFAULT_FOUR_BALL_STAKES: FourBallStakes = {

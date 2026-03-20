@@ -1,6 +1,7 @@
 import { Sliders, Check, X } from 'lucide-react';
 import type { AppState } from '../../hooks/useAppState';
 import { getLastPlaceHoleCount } from '../../utils/wolf';
+import { JUNK_LABELS, MANUAL_JUNK_TYPES } from '../../utils/junk';
 
 interface RulesTabProps {
   appState: AppState;
@@ -439,6 +440,89 @@ export function RulesTab({ appState }: RulesTabProps) {
 
           {/* Suppress unused variable warning */}
           {selectedCourse && null}
+        </div>
+      </div>
+
+      {/* Junk / Dots Settings Card */}
+      <div className="card settings-card">
+        <h3><Sliders size={14} /> JUNK / DOTS</h3>
+        <div className="settings-grid">
+          <div className="setting-control-row">
+            <div className="setting-info">
+              <strong>Track Junk</strong>
+              <p>Enable dot tracking for side bets</p>
+            </div>
+            <button
+              className={`checkbox-btn ${settings.useJunk ? 'checked' : ''}`}
+              onClick={() => setSettings(s => ({ ...s, useJunk: !s.useJunk }))}
+            >
+              {settings.useJunk ? <Check size={16} /> : <X size={16} />}
+            </button>
+          </div>
+
+          {settings.useJunk && (
+            <>
+              <div className="setting-control-row">
+                <div className="setting-info">
+                  <strong>Dollar Value Per Dot</strong>
+                  <p>Each dot is worth this amount against each opponent</p>
+                </div>
+                <input
+                  type="number"
+                  className="setting-number-input"
+                  min={1}
+                  max={100}
+                  value={settings.junkDotValue}
+                  onChange={e => {
+                    const v = parseInt(e.target.value);
+                    if (v >= 1 && v <= 100) setSettings(s => ({ ...s, junkDotValue: v }));
+                  }}
+                />
+              </div>
+
+              <h4 className="settings-sub-header">Junk Types</h4>
+
+              {MANUAL_JUNK_TYPES.map(type => (
+                <div key={type} className="setting-control-row">
+                  <div className="setting-info">
+                    <strong>{JUNK_LABELS[type]}</strong>
+                    <p>
+                      {type === 'greenie' && 'Hit green in regulation and make par or better'}
+                      {type === 'sandie' && 'Get up and down from a greenside bunker for par or better'}
+                      {type === 'chippie' && 'Hole out from off the green (no putters)'}
+                      {type === 'barkie' && 'Make par or better after ball hits a tree trunk'}
+                      {type === 'poley' && 'Sink a putt longer than the flagstick for par or better'}
+                    </p>
+                  </div>
+                  <button
+                    className={`checkbox-btn ${settings.junkTypes[type] ? 'checked' : ''}`}
+                    onClick={() => setSettings(s => ({
+                      ...s,
+                      junkTypes: { ...s.junkTypes, [type]: !s.junkTypes[type] },
+                    }))}
+                  >
+                    {settings.junkTypes[type] ? <Check size={16} /> : <X size={16} />}
+                  </button>
+                </div>
+              ))}
+
+              <div className="setting-control-row">
+                <div className="setting-info">
+                  <strong>{JUNK_LABELS['birdieEagle']}</strong>
+                  <p>1 dot for gross birdie, 3 dots for gross eagle or better (auto-calculated)</p>
+                </div>
+                <button
+                  className={`checkbox-btn ${settings.junkTypes.birdieEagle ? 'checked' : ''}`}
+                  onClick={() => setSettings(s => ({
+                    ...s,
+                    junkTypes: { ...s.junkTypes, birdieEagle: !s.junkTypes.birdieEagle },
+                  }))}
+                >
+                  {settings.junkTypes.birdieEagle ? <Check size={16} /> : <X size={16} />}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
